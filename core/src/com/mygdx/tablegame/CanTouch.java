@@ -7,6 +7,8 @@ public class CanTouch {
     static ArrayList<Touchable> sprite_collisions=new ArrayList<>();
     static ArrayList<Card> renderable_3d =new ArrayList<>();
     static ArrayList<Card> renderable_2d=new ArrayList<>();
+    static ArrayList<Card> need_to_delete3D=new ArrayList<>();
+    static ArrayList<Card> need_to_delete2D=new ArrayList<>();
     static Card now_selected_card=null;
 
     public static void setNow_selected_card(Card card) {

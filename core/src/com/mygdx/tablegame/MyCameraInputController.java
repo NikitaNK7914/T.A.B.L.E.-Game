@@ -111,7 +111,7 @@ public class MyCameraInputController extends GestureDetector {
             for (Touchable touchable : CanTouch.sprite_collisions) {
                 if(touchable.getSpriteHitBox().contains(x,y)){touch3d=false;
                     if(TimeUtils.timeSinceMillis(touchable.prevTouchTime)<1000){touchable.sprite_doubleTouched();touchable.updateTime();}
-                    else touchable.sprite_touched();
+                    else {touchable.sprite_touched();touchable.updateTime();}
                 }
 
             }
@@ -126,7 +126,7 @@ public class MyCameraInputController extends GestureDetector {
             }
             if(touchInd!=-1){
             if(TimeUtils.timeSinceMillis(CanTouch.collisions.get(touchInd).prevTouchTime)<1000){CanTouch.collisions.get(touchInd).doubleTouched();CanTouch.collisions.get(touchInd).updateTime();}
-            else CanTouch.collisions.get(touchInd).touched();}
+            else {CanTouch.collisions.get(touchInd).touched();CanTouch.collisions.get(touchInd).updateTime();}}
             }
             return true;
         }

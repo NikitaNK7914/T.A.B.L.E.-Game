@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -26,6 +28,7 @@ public class MainMenuScreen implements Screen {
     TextureAtlas atlas;
     PerspectiveCamera camera;
     TextButton button;
+    List list;
 
     public MainMenuScreen(GameController gam) {
         game=gam;
@@ -36,9 +39,14 @@ public class MainMenuScreen implements Screen {
         atlas=new TextureAtlas("text_button.pack");
         skin.addRegions(atlas);
         skin.load(Gdx.files.internal("skin.json"));
-
+        TextField[] items=new TextField[]{new TextField("sfdxgcvhbjnklm",skin)};
+        //items[0].getStyle().font.getData().setScale(5);
+        list=new List<>(skin);
+        list.setItems(items);
+        list.setPosition(500,300);
+        list.setSize(500,250);
         button=new TextButton("Start Game",skin);
-        button.setSize(250,500);
+        button.setSize(500,300);
         button.setX(Gdx.graphics.getWidth()/2-100);
         button.setY(Gdx.graphics.getHeight()/2-50);
         button.setColor(new Color(0.57f,0.222222f,0.362785f,1));
@@ -59,7 +67,7 @@ public class MainMenuScreen implements Screen {
     @Override
     public void render(float delta) {
         camera.update();
-        ScreenUtils.clear(0,0,0,1);
+        ScreenUtils.clear(1,1,1,1);
         stage.act();
         stage.draw();
     }

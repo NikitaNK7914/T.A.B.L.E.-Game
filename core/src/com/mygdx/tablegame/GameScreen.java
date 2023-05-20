@@ -26,22 +26,22 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 
 public class GameScreen implements Screen {
     GameController game;
-    PerspectiveCamera camera;
     Model table_model;
     ModelInstance table_instance;
     ModelBatch modelBatch;
     Environment environment;
-    Player player;
     SpriteBatch spriteBatch;
     long Time;
 
 
     public GameScreen(GameController gam) {
         game = gam;
+        Server.server_init(4);
         modelBatch = new ModelBatch();
         table_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("Table.g3dj"));
         table_instance = new ModelInstance(table_model);
@@ -49,56 +49,60 @@ public class GameScreen implements Screen {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
-        player = new Player(new Vector3(70, 50, 0),1);
-        camera = player.camera;
-        for (int i = 0; i < 20; i++) {
-            Card card = new Card();
-            card.setCardPos(player.deck_pos);
-            CanTouch.collisions.add(card);
-            CanTouch.sprite_collisions.add(card);
-            CanTouch.renderable_3d.add(card);
-            player.addToDeck(card);
-        }
-        camera.update();
+        Server.player_now.camera.update();
         spriteBatch=new SpriteBatch();
     }
 
     @Override
     public void show() {
-        player.player_init();
+        Server.player_now.player_init();
+        Server.player_now.getHand();
+        //Server.refresh_market();
         Time=TimeUtils.millis();
-        player.getHand();
     }
 
     @Override
     public void render(float delta) {
-        player.inputController.update();
+        Server.player_now.inputController.update();
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        modelBatch.begin(camera);
+        modelBatch.begin(Server.player_now.camera);
         modelBatch.render(table_instance, environment);
-        for (Card card : CanTouch.renderable_3d) {
+        if(!CanTouch.renderable_3d.isEmpty())
+        {for (Card card : CanTouch.renderable_3d) {
             if (card.animations3D.isEmpty()) {
             } else {
                 if (card.animations3D.get(0).iterator().hasNext()) {
                     card.setCardPos((Vector3) card.animations3D.get(0).iterator().next());
                 } else {
-                    card.animations3Dend(card.animations3D.get(0).id);
-                    card.animations3D.remove(0);
+                    CanTouch.need_to_delete3D.add(card);
                 }
             }
             modelBatch.render(card.instance);
         }
+        }
+        for(int i=0;i<CanTouch.need_to_delete3D.size();){
+            CanTouch.need_to_delete3D.get(0).animation3Dend(CanTouch.need_to_delete3D.get(0).animations3D.get(0).id);
+            CanTouch.need_to_delete3D.get(0).animations3D.remove(0);
+            CanTouch.need_to_delete3D.remove(0);
+        }
         modelBatch.end();
         spriteBatch.begin();
+        if(!CanTouch.renderable_2d.isEmpty()){
         for (Card card: CanTouch.renderable_2d) {
             Pair<Vector2,Float> animation_data;
             if(card.animations2D.isEmpty()){}
             else {if(card.animations2D.get(0).iterator().hasNext()) {animation_data= (Pair<Vector2, Float>) card.animations2D.get(0).iterator().next();
                 card.sprite.setPosition(animation_data.first.x,animation_data.first.y);
-                card.sprite.rotate(animation_data.second);}
-            else {card.animations2D.remove(0);}}
+               card.sprite.rotate(animation_data.second);}
+            else {CanTouch.need_to_delete2D.add(card);}
+            }
             card.sprite.draw(spriteBatch);
+        }}
+        for(int i=0;i<CanTouch.need_to_delete2D.size();){
+            CanTouch.need_to_delete2D.get(0).animation2Dend(CanTouch.need_to_delete2D.get(0).animations2D.get(0).id);
+            CanTouch.need_to_delete2D.get(0).animations2D.remove(0);
+            CanTouch.need_to_delete2D.remove(0);
         }
         spriteBatch.end();
     }
