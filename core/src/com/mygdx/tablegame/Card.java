@@ -8,30 +8,31 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.TimeUtils;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class Card extends Touchable {
     final static Model card_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("card_model1.g3dj"));
     Vector3 card_pos = new Vector3(0, 0, 0);
     ModelInstance instance;
+    Integer cost=3;
     Integer power_points;
     Integer win_points;
     boolean is3D;
-    TextureAttribute simple_3Dtexture = new TextureAttribute(TextureAttribute.Diffuse, new Texture("card_texture1.png"));
-    TextureAttribute selected_3Dtexture = new TextureAttribute(TextureAttribute.Diffuse, new Texture(Gdx.files.internal("card_texture_selected.PNG")));
-    Texture simple_2Dtexture = new Texture(Gdx.files.internal("card_texture.PNG"));
-    Texture selected_2Dtexture = new Texture(Gdx.files.internal("card_texture_selected.PNG"));
     BoundingBox box;
     Sprite sprite;
-
+    static int lay_down_cards = 0;
     ArrayList<Generator> animations2D;
     ArrayList<Generator> animations3D;
     float max_rotate_angel = 8;
@@ -40,41 +41,45 @@ public class Card extends Touchable {
     float inHand_rotation;
     Vector3 temp_camera_pos;
     Vector3 temp_on_table_pos;
+    Plane plane;
+    boolean in_market=false;
+    int texture_id;
 
-    public Card() {
-        sprite = new Sprite(simple_2Dtexture, simple_2Dtexture.getWidth(), simple_2Dtexture.getHeight());
-        sprite.setCenter(simple_2Dtexture.getWidth() / 2, simple_2Dtexture.getHeight() / 2);
+    public Card(int texture_id) {
+        this.texture_id=texture_id;
+        sprite = new Sprite(TextureStorage.textures2d[texture_id][0], TextureStorage.textures2d[texture_id][0].getWidth(), TextureStorage.textures2d[texture_id][0].getHeight());
+        sprite.setCenter(TextureStorage.textures2d[texture_id][0].getWidth() / 2, TextureStorage.textures2d[texture_id][0].getHeight() / 2);
         sprite.setOrigin(sprite.getWidth(), sprite.getHeight());
-        sprite.setTexture(simple_2Dtexture);
+        change_texture(1);
         is3D = true;
         instance = new ModelInstance(card_model);
         instance.transform.setTranslation(card_pos);
-        change_texture(3);
         box = new BoundingBox();
-        instance.transform.setToScaling(10, 10, 10);
+        instance.transform.setToScaling(8.5f, 8.5f, 8.5f);
         instance.transform.rotate(1, 0, 0, 180);
+        change_texture(3);
         animations2D = new ArrayList<>();
         animations3D = new ArrayList<>();
         instance.calculateBoundingBox(box).mul(instance.transform);
+        plane=new Plane(box.getCorner000(new Vector3()),box.getCorner001(new Vector3()),box.getCorner010(new Vector3()));
     }
 
     public void change_texture(int type) {
         if (type == 1) {
-            sprite.setTexture(simple_2Dtexture);
+            sprite.setTexture(TextureStorage.textures2d[texture_id][0]);
         }
         if (type == 2) {
-            sprite.setTexture(selected_2Dtexture);
+            sprite.setTexture(TextureStorage.textures2d[texture_id][1]);
         }
         if (type == 3) {
-            instance.materials.get(0).set(simple_3Dtexture);
+            instance.materials.get(0).set(TextureStorage.textures3d[texture_id][0]);
         }
         if (type == 4) {
-            instance.materials.get(0).set(selected_3Dtexture);
+            instance.materials.get(0).set(TextureStorage.textures3d[texture_id][1]);
         }
     }
 
     public void played() {
-
     }
 
     public Generator<Vector3> doAnimation3D(final Vector3 startPos, final Vector3 endPos, final int frames, String id) {
@@ -82,11 +87,8 @@ public class Card extends Touchable {
             @Override
             protected void run() throws InterruptedException {
                 Vector3 nowPos = new Vector3(startPos);
-                if (endPos.x == startPos.x) startPos.x += 0.00000001f;
                 float distanceXpFrame = (float) (Math.abs(endPos.x - startPos.x) / frames);
-                if (endPos.y == startPos.y) startPos.y += 0.00000001f;
                 float distanceYpFrame = (float) (Math.abs(endPos.y - startPos.y) / frames);
-                if (endPos.z == startPos.z) startPos.z += 0.00000001f;
                 float distanceZpFrame = (float) (Math.abs(endPos.z - startPos.z) / frames);
                 int directionX = 1, directionY = 1, directionZ = 1;
                 if (endPos.x < startPos.x) directionX = -1;
@@ -107,11 +109,9 @@ public class Card extends Touchable {
             @Override
             protected void run() throws InterruptedException {
                 Vector2 nowPos = new Vector2(startPos);
-                float rotatePframe = (float) (rotation / frames);
-                if (endPos.x == startPos.x) startPos.x += 0.000000001f;
-                float distanceXpFrame = (float) (Math.abs(endPos.x - startPos.x) / frames);
-                if (endPos.y == startPos.y) startPos.y += 0.000000001f;
-                float distanceYpFrame = (float) (Math.abs(endPos.y - startPos.y) / frames);
+                float rotatePframe = rotation / frames;
+                float distanceXpFrame = Math.abs(endPos.x - startPos.x) / frames;
+                float distanceYpFrame = Math.abs(endPos.y - startPos.y) / frames;
                 int directionX = 1, directionY = 1;
                 if (endPos.x < startPos.x) directionX = -1;
                 if (endPos.y < startPos.y) directionY = -1;
@@ -131,7 +131,7 @@ public class Card extends Touchable {
 
     public void setCardPos(Vector3 pos) {
         card_pos = pos;
-        instance.transform.setTranslation(card_pos);
+        instance.transform.setTranslation(pos);
     }
 
     public BoundingBox getHitBox() {
@@ -148,7 +148,10 @@ public class Card extends Touchable {
     }
 
     public void doubleTouched() {
-        Server.turn_ended();
+        if (Server.market_deck.contains(this) && Server.player_now.power_points>=cost) {
+            Server.player_now.power_points-=cost;
+            animations3D.add(doAnimation3D(update_pos(), Server.player_now.trash_pos, 30, "market_to_trash"));
+        }
     }
 
     public void sprite_touched() {
@@ -156,7 +159,7 @@ public class Card extends Touchable {
     }
 
     public void sprite_doubleTouched() {
-        convertTo3D(Server.player_now.camera.position, Server.player_now.played_card_pos);
+        convertTo3D(Server.player_now.camera.position, new Vector3(Server.player_now.played_card_pos.x+MathUtils.random(-1.2f,1.2f),Server.player_now.played_card_pos.y,Server.player_now.played_card_pos.z+ MathUtils.random(-1.2f,1.2f)));
     }
 
     public void convertTo3D(Vector3 camera_pos, Vector3 target_pos) {
@@ -166,8 +169,8 @@ public class Card extends Touchable {
     }
 
     public void convertTo2D(Vector3 camera_pos) {
-        Generator<Vector3> animation3D = doAnimation3D(card_pos, camera_pos, 60, "convert3D");
-        animations3D.add(animation3D);
+        if (!CanTouch.renderable_3d.contains(this)) CanTouch.renderable_3d.add(this);
+        animations3D.add(doAnimation3D(update_pos(), camera_pos, 60, "convert2D"));
     }
 
     public void calculate_inHand_pos(int hand_size, int index, boolean set) {
@@ -201,12 +204,12 @@ public class Card extends Touchable {
             sprite.setPosition(x, y);
             sprite.rotate(rotation);
         }
-        sprite.setOriginCenter();
+        //sprite.setOriginCenter();
     }
 
     public void animation3Dend(String animation_id) {
         switch (animation_id) {
-            case ("convert3D"): {
+            case ("convert2D"): {
                 CanTouch.renderable_3d.remove(this);
                 CanTouch.collisions.remove(this);
                 CanTouch.renderable_2d.add(this);
@@ -216,12 +219,35 @@ public class Card extends Touchable {
                 break;
             }
             case ("played_from_hand"): {
-                if (!CanTouch.collisions.contains(this)) CanTouch.collisions.add(this);
-                played();
-                Server.player_now.on_table_cards.add(this);
+                if (Server.turn_end_button_pressed) {
+                    CanTouch.renderable_3d.remove(this);
+                    CanTouch.collisions.remove(this);
+                    Server.player_now.trash.add(this);
+                } else {
+                    if (!CanTouch.collisions.contains(this)) CanTouch.collisions.add(this);
+                    played();
+                    Server.player_now.on_table_cards.add(this);
+                }
+                break;
             }
             case ("to_market_deck"): {
                 if (!CanTouch.collisions.contains(this)) CanTouch.collisions.add(this);
+                in_market=true;
+                break;
+            }
+            case ("to_trash_end"): {
+                CanTouch.renderable_3d.remove(this);
+                CanTouch.collisions.remove(this);
+                Server.player_now.on_table_cards.remove(this);
+                Server.player_now.trash.add(this);
+                if (Server.player_now.hand.isEmpty()) Server.player_now.getHand();
+                break;
+            }
+            case ("market_to_trash"): {
+                CanTouch.renderable_3d.remove(this);
+                CanTouch.collisions.remove(this);
+                Server.market_deck.remove(this);
+                Server.player_now.trash.add(this);
             }
         }
     }
@@ -232,12 +258,27 @@ public class Card extends Touchable {
                 CanTouch.renderable_2d.remove(this);
                 CanTouch.sprite_collisions.remove(this);
                 CanTouch.renderable_3d.add(this);
-                animations3D.add(doAnimation3D(temp_camera_pos,temp_on_table_pos, 60, "played_from_hand"));
+                animations3D.add(doAnimation3D(temp_camera_pos, temp_on_table_pos, 60, "played_from_hand"));
                 Server.player_now.hand.remove(this);
                 Server.player_now.refresh_hands_positions();
                 is3D = true;
+                break;
             }
-
+            case ("laying_out_card"): {
+                if (Server.turn_end_button_pressed) {
+                    Server.server_time = TimeUtils.millis();
+                    for (Card card : Server.player_now.hand) {
+                        CanTouch.renderable_2d.remove(card);
+                        CanTouch.sprite_collisions.remove(card);
+                    }
+                    if (lay_down_cards >= 4) {
+                        Server.turn_started();
+                        lay_down_cards = 0;
+                    } else lay_down_cards++;
+                }
+                Server.player_now.refresh_hands_positions();
+                break;
+            }
         }
     }
 
@@ -256,8 +297,9 @@ public class Card extends Touchable {
             animations2D.add(doAnimation2D(new Vector2(sprite.getX(), sprite.getY()), new Vector2(sprite.getX(), 0), 15, 0 - sprite.getRotation(), "selected"));
         }
     }
-    public Vector3 update_pos(){
-        instance.calculateBoundingBox(box);
+
+    public Vector3 update_pos() {
+        instance.calculateBoundingBox(box).mul(instance.transform);
         box.getCenter(card_pos);
         return card_pos;
     }

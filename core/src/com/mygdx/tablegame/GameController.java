@@ -11,11 +11,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public  class GameController extends Game {
 	MainMenuScreen menu;
-	GameScreen gameScreen;
+	static GameState state;
 
 	@Override
 	public void create () {
-		gameScreen=new GameScreen(this);
+		TextureStorage tx=new TextureStorage();
 		menu=new MainMenuScreen(this);
 		this.setScreen(menu);
 	}
