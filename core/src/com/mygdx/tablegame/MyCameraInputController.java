@@ -1,4 +1,5 @@
 package com.mygdx.tablegame;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.Buttons;
@@ -106,27 +107,43 @@ public class MyCameraInputController extends GestureDetector {
 
         @Override
         public boolean tap(float x, float y, int count, int button) {
-            boolean touch3d=true;
-            y=Gdx.graphics.getHeight()-y;
+            boolean touch3d = true;
+            y = Gdx.graphics.getHeight() - y;
             for (Touchable touchable : CanTouch.sprite_collisions) {
-                if(touchable.getSpriteHitBox().contains(x,y)){touch3d=false;
-                    if(TimeUtils.timeSinceMillis(touchable.prevTouchTime)<1000){touchable.sprite_doubleTouched();touchable.updateTime();}
-                    else {touchable.sprite_touched();touchable.updateTime();}
+                if (touchable.getSpriteHitBox().contains(x, y)) {
+                    touch3d = false;
+                    if (TimeUtils.timeSinceMillis(touchable.prevTouchTime) < 1000) {
+                        touchable.sprite_doubleTouched();
+                        touchable.updateTime();
+                    } else {
+                        touchable.sprite_touched();
+                        touchable.updateTime();
+                    }
                 }
 
             }
-            if(touch3d){
-            y=Gdx.graphics.getHeight()-y;
-            Ray ray=controller.camera.getPickRay(x,y);
-            Vector3 tPos=new Vector3();
-            int touchInd=-1;
-            float minDistance=100000;
-            for (Touchable touchable:CanTouch.collisions) {
-                if(Intersector.intersectRayBounds(ray,touchable.getHitBox(),tPos)) if(Math.abs(tPos.x-ray.origin.x)+Math.abs(tPos.y-ray.origin.y)+Math.abs(tPos.z-ray.origin.z)<minDistance){touchInd=CanTouch.collisions.indexOf(touchable);minDistance=Math.abs(tPos.x-ray.origin.x)+Math.abs(tPos.y-ray.origin.y)+Math.abs(tPos.z-ray.origin.z);}
-            }
-            if(touchInd!=-1){
-            if(TimeUtils.timeSinceMillis(CanTouch.collisions.get(touchInd).prevTouchTime)<1000){CanTouch.collisions.get(touchInd).doubleTouched();CanTouch.collisions.get(touchInd).updateTime();}
-            else {CanTouch.collisions.get(touchInd).touched();CanTouch.collisions.get(touchInd).updateTime();}}
+            if (touch3d) {
+                y = Gdx.graphics.getHeight() - y;
+                Ray ray = controller.camera.getPickRay(x, y);
+                Vector3 tPos = new Vector3();
+                int touchInd = -1;
+                float minDistance = 100000;
+                for (Touchable touchable : CanTouch.collisions) {
+                    if (Intersector.intersectRayBounds(ray, touchable.getHitBox(), tPos))
+                        if (Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z) < minDistance) {
+                            touchInd = CanTouch.collisions.indexOf(touchable);
+                            minDistance = Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z);
+                        }
+                }
+                if (touchInd != -1) {
+                    if (TimeUtils.timeSinceMillis(CanTouch.collisions.get(touchInd).prevTouchTime) < 1000) {
+                        CanTouch.collisions.get(touchInd).doubleTouched();
+                        CanTouch.collisions.get(touchInd).updateTime();
+                    } else {
+                        CanTouch.collisions.get(touchInd).touched();
+                        CanTouch.collisions.get(touchInd).updateTime();
+                    }
+                }
             }
             return true;
         }
@@ -233,9 +250,15 @@ public class MyCameraInputController extends GestureDetector {
 
     protected boolean process(float deltaX, float deltaY, int button) {
         if (button == rotateButton) {
-            tmpV1.set(camera.direction).crs(camera.up).y = 0f;
-            camera.rotate( tmpV1.nor(), deltaY * rotateAngle);
-            camera.rotate( Vector3.Y, deltaX * -rotateAngle);
+            if (GameScreen.camera_type) {
+                tmpV1.set(camera.direction).crs(camera.up).y = 0f;
+                camera.rotate(tmpV1.nor(), deltaY * rotateAngle);
+                camera.rotate(Vector3.Y, deltaX * -rotateAngle);
+            } else {
+                tmpV1.set(camera.direction).crs(camera.up).y = 0f;
+                camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
+                camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
+            }
         } else if (button == translateButton) {
             camera.translate(tmpV1.set(camera.direction).crs(camera.up).nor().scl(-deltaX * translateUnits));
             camera.translate(tmpV2.set(camera.up).scl(-deltaY * translateUnits));

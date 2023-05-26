@@ -93,7 +93,7 @@ public class MainMenuScreen implements Screen {
         add_player_button = new TextButton("add player", skin);
         begin_game_button = new TextButton("start game", skin);
         enter_players_name = new TextField("enter player`s name", skin);
-        enter_players_name.setPosition(Gdx.graphics.getWidth() / 2f - enter_players_name.getWidth() * 1.7f, Gdx.graphics.getHeight() * 0.67f);
+        enter_players_name.setPosition(Gdx.graphics.getWidth() / 2f - enter_players_name.getWidth() * 3f, Gdx.graphics.getHeight() * 0.67f);
         enter_players_name.setSize(800, 150);
         enter_players_name.getStyle().font.getData().setScale(4);
         enter_players_name.addListener(new ClickListener() {

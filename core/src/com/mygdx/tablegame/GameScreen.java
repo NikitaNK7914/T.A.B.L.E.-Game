@@ -63,7 +63,8 @@ public class GameScreen implements Screen {
     Stage run_stage;
     InputMultiplexer inputMultiplexer = new InputMultiplexer();
     static String[] player_UI_names = new String[4];
-
+    static boolean camera_type=false;
+    TextButton camera_button;
     public GameScreen() {
         modelBatch = new ModelBatch();
         terrain_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("terrain.g3dj"));
@@ -137,16 +138,30 @@ public class GameScreen implements Screen {
         changing_stage.addActor(change_button);
         end_turn_button = new TextButton("End Turn", skin);
         end_turn_button.getLabel().setFontScale(4);
-        end_turn_button.setSize(500, 250);
+        end_turn_button.setSize(550, 200);
         end_turn_button.setColor(Color.BLUE);
         end_turn_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight());
         end_turn_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
+                Server.player_now.power_points=0;
+                GameScreen.player_UI_names[Server.player_now.player_number]=Server.player_now.name+"`s power points  : "+Server.player_now.power_points;
                 Server.turn_ended();
+            }
+        });
+        camera_button = new TextButton("Camera type change", skin);
+        camera_button.getLabel().setFontScale(3);
+        camera_button.setSize(550, 200);
+        camera_button.setColor(Color.GREEN);
+        camera_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight()*2);
+        camera_button.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                if(camera_type) camera_type=false;
+                else camera_type=true;
             }
         });
         run_stage = new Stage();
         run_stage.addActor(end_turn_button);
+        run_stage.addActor(camera_button);
         for (int i = 0; i < Server.players_count; i++) {
             player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].power_points;
         }
@@ -232,6 +247,10 @@ public class GameScreen implements Screen {
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
                 modelBatch.begin(Server.player_now.camera);
                 modelBatch.render(table_instance, environment);
+                modelBatch.render(terrain_instance,environment);
+                for (Card card : decks) {
+                    modelBatch.render(card.instance, environment);
+                }
                 if (!CanTouch.renderable_3d.isEmpty()) {
                     for (Card card : CanTouch.renderable_3d) {
                         modelBatch.render(card.instance);

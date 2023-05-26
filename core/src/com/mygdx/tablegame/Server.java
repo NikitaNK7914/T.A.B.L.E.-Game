@@ -79,7 +79,7 @@ public class Server {
         }
         for (int i = 0; i < players_count; i++) {
             players[i].name = names.get(i);
-            for (int j = 0; j < 7; j++) {
+            for (int j = 0; j < 6; j++) {
                 Znak card = new Znak();
                 card.setCardPos(players[i].deck_pos);
                 players[i].deck.add(card);
@@ -89,20 +89,25 @@ public class Server {
                 card.setCardPos(players[i].deck_pos);
                 players[i].deck.add(card);
             }
+            for (int j = 0; j < 1; j++) {
+                Fire_ball card = new Fire_ball();
+                card.setCardPos(players[i].deck_pos);
+                players[i].deck.add(card);
+            }
             Collections.shuffle(players[i].deck);
         }
         player_now = players[0];
         players_count = players_count;
         turns_lasts = 0;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             Fire_ball card = new Fire_ball();
             main_deck.add(card);
         }
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             Magic_dog card = new Magic_dog();
             main_deck.add(card);
         }
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             Protection_amulet card = new Protection_amulet();
             main_deck.add(card);
         }
