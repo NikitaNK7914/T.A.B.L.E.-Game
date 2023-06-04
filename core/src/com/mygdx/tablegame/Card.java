@@ -34,7 +34,7 @@ public class Card extends Touchable {
     Sprite sprite;
     static int lay_down_cards = 0;
     ArrayList<Generator> animations2D;
-    ArrayList<Generator> animations3D;
+    ArrayList<Animation> animations3D;
     float max_rotate_angel = 8;
     float inHandX;
     float inHandY;
@@ -82,27 +82,6 @@ public class Card extends Touchable {
     public void played() {
     }
 
-    public Generator<Vector3> doAnimation3D(final Vector3 startPos, final Vector3 endPos, final int frames, String id) {
-        Generator<Vector3> generator = new Generator<Vector3>() {
-            @Override
-            protected void run() throws InterruptedException {
-                Vector3 nowPos = new Vector3(startPos);
-                float distanceXpFrame = (float) (Math.abs(endPos.x - startPos.x) / frames);
-                float distanceYpFrame = (float) (Math.abs(endPos.y - startPos.y) / frames);
-                float distanceZpFrame = (float) (Math.abs(endPos.z - startPos.z) / frames);
-                int directionX = 1, directionY = 1, directionZ = 1;
-                if (endPos.x < startPos.x) directionX = -1;
-                if (endPos.y < startPos.y) directionY = -1;
-                if (endPos.z < startPos.z) directionZ = -1;
-                for (int i = 1; i <= frames; i++) {
-                    nowPos.set(startPos.x + distanceXpFrame * i * directionX, startPos.y + distanceYpFrame * i * directionY, startPos.z + distanceZpFrame * i * directionZ);
-                    yield(nowPos);
-                }
-            }
-        };
-        generator.id = id;
-        return generator;
-    }
 
     public Generator<Pair<Vector2, Float>> doAnimation2D(final Vector2 startPos, final Vector2 endPos, final int frames, final float rotation, String id) {
         Generator<Pair<Vector2, Float>> generator = new Generator<Pair<Vector2, Float>>() {
@@ -131,7 +110,11 @@ public class Card extends Touchable {
 
     public void setCardPos(Vector3 pos) {
         card_pos = pos;
-        instance.transform.setTranslation(pos);
+        instance.transform.setTranslation(card_pos);
+    }
+    public void setCardPos(float x,float y, float z) {
+        card_pos.set(x,y,z);
+        instance.transform.setTranslation(card_pos);
     }
 
     public BoundingBox getHitBox() {
@@ -150,7 +133,7 @@ public class Card extends Touchable {
     public void doubleTouched() {
         if (Server.market_deck.contains(this) && Server.player_now.power_points>=cost) {
             Server.player_now.power_points-=cost;
-            animations3D.add(doAnimation3D(update_pos(), Server.player_now.trash_pos, 30, "market_to_trash"));
+            animations3D.add(new Animation(update_pos(), Server.player_now.trash_pos, 2000, "market_to_trash"));
         }
     }
 
@@ -165,12 +148,12 @@ public class Card extends Touchable {
     public void convertTo3D(Vector3 camera_pos, Vector3 target_pos) {
         temp_camera_pos = camera_pos;
         temp_on_table_pos = target_pos;
-        animations2D.add(doAnimation2D(new Vector2(sprite.getX(), sprite.getY()), new Vector2(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2), 2, 0 - sprite.getRotation(), "convert3D"));
+        animations2D.add(doAnimation2D(new Vector2(sprite.getX(), sprite.getY()), new Vector2(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2), 30, 0 - sprite.getRotation(), "convert3D"));
     }
 
     public void convertTo2D(Vector3 camera_pos) {
         if (!CanTouch.renderable_3d.contains(this)) CanTouch.renderable_3d.add(this);
-        animations3D.add(doAnimation3D(update_pos(), camera_pos, 60, "convert2D"));
+        animations3D.add(new Animation(update_pos(), camera_pos, 6000,new Vector3(0,0,0),new Vector3(90,0,0), "convert2D"));
     }
 
     public void calculate_inHand_pos(int hand_size, int index, boolean set) {
@@ -258,7 +241,7 @@ public class Card extends Touchable {
                 CanTouch.renderable_2d.remove(this);
                 CanTouch.sprite_collisions.remove(this);
                 CanTouch.renderable_3d.add(this);
-                animations3D.add(doAnimation3D(temp_camera_pos, temp_on_table_pos, 60, "played_from_hand"));
+                animations3D.add(new Animation(temp_camera_pos, temp_on_table_pos, 2000, "played_from_hand"));
                 Server.player_now.hand.remove(this);
                 Server.player_now.refresh_hands_positions();
                 is3D = true;

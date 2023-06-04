@@ -197,68 +197,68 @@ public class Server {
             if (market_deck.get(i).in_market) {
                 if (players_count == 2) {
                     if (player_now.player_number % 2 == 0) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     } else {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 3) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 4) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 3) {
-                        card.animations3D.add(card.doAnimation3D(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                 }
 
             } else {
                 if (players_count == 2) {
                     if (player_now.player_number % 2 == 0) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     } else {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 3) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 4) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 3) {
-                        card.animations3D.add(card.doAnimation3D(main_deck_pos, new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 30, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 2000, "to_market_deck"));
                     }
                 }
             }
@@ -271,7 +271,7 @@ public class Server {
             card.convertTo3D(player_now.camera.position, player_now.trash_pos);
         }
         for (Card card : player_now.on_table_cards) {
-            card.animations3D.add(card.doAnimation3D(card.update_pos(), player_now.trash_pos, 60, "to_trash_end"));
+            card.animations3D.add(new Animation(card.update_pos(), player_now.trash_pos, 2000, "to_trash_end"));
         }
         turns_lasts++;
         if (main_deck.isEmpty() && market_deck.size() < 5) {

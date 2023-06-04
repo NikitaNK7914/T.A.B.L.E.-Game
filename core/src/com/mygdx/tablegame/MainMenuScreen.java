@@ -80,6 +80,13 @@ public class MainMenuScreen implements Screen {
         settings_button.getLabel().setFontScale(5);
         settings_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
+                names.add("biba");
+                names.add("boba");
+                names.add("hui s goryi");
+                Server.players_count+=3;
+                Server.server_init(names);
+                game.setScreen(new GameScreen());
+                GameController.state=GameState.CHANGE_PLAYER;
             }
         });
         verticalGroup.setSize(600, 500);

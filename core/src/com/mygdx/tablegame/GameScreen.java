@@ -24,7 +24,11 @@ import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix3;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -63,8 +67,13 @@ public class GameScreen implements Screen {
     Stage run_stage;
     InputMultiplexer inputMultiplexer = new InputMultiplexer();
     static String[] player_UI_names = new String[4];
-    static boolean camera_type=false;
+    static boolean camera_type = false;
     TextButton camera_button;
+    Animation anim_data = new Animation();
+    Matrix3 anim_matrix = new Matrix3();
+    Matrix4 matrix4 = new Matrix4();
+    Quaternion quaternion = new Quaternion();
+
     public GameScreen() {
         modelBatch = new ModelBatch();
         terrain_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("terrain.g3dj"));
@@ -128,11 +137,11 @@ public class GameScreen implements Screen {
         change_button.setPosition(Gdx.graphics.getWidth() / 2 - change_button.getWidth() / 2, Gdx.graphics.getHeight() / 5);
         change_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                GameController.state = GameState.RUN;
                 inputMultiplexer.clear();
                 inputMultiplexer.addProcessor(run_stage);
-                inputMultiplexer.addProcessor(Server.player_now.inputController);
+                //inputMultiplexer.addProcessor(Server.player_now.inputController);
                 Server.refresh_market();
+                GameController.state = GameState.RUN;
             }
         });
         changing_stage.addActor(change_button);
@@ -143,8 +152,8 @@ public class GameScreen implements Screen {
         end_turn_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight());
         end_turn_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                Server.player_now.power_points=0;
-                GameScreen.player_UI_names[Server.player_now.player_number]=Server.player_now.name+"`s power points  : "+Server.player_now.power_points;
+                Server.player_now.power_points = 0;
+                GameScreen.player_UI_names[Server.player_now.player_number] = Server.player_now.name + "`s power points  : " + Server.player_now.power_points;
                 Server.turn_ended();
             }
         });
@@ -152,11 +161,11 @@ public class GameScreen implements Screen {
         camera_button.getLabel().setFontScale(3);
         camera_button.setSize(550, 200);
         camera_button.setColor(Color.GREEN);
-        camera_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight()*2);
+        camera_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight() * 2);
         camera_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                if(camera_type) camera_type=false;
-                else camera_type=true;
+                if (camera_type) camera_type = false;
+                else camera_type = true;
             }
         });
         run_stage = new Stage();
@@ -179,22 +188,50 @@ public class GameScreen implements Screen {
         switch (GameController.state) {
             case RUN: {
                 Gdx.input.setInputProcessor(inputMultiplexer);
-                Server.player_now.inputController.update();
                 Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
                 ScreenUtils.clear(Color.SKY);
+                Server.player_now.camera.update();
                 modelBatch.begin(Server.player_now.camera);
                 modelBatch.render(table_instance, environment);
-                modelBatch.render(terrain_instance,environment);
+                modelBatch.render(terrain_instance, environment);
                 for (Card card : decks) {
                     modelBatch.render(card.instance, environment);
                 }
                 if (!CanTouch.renderable_3d.isEmpty()) {
                     for (Card card : CanTouch.renderable_3d) {
                         if (!card.animations3D.isEmpty()) {
-                            if (card.animations3D.get(0).iterator().hasNext()) {
-                                card.setCardPos((Vector3) card.animations3D.get(0).iterator().next());
-                            } else {
+                            anim_data = card.animations3D.get(0);
+                            if (anim_data.start_time == -1) {
+                                anim_data.start_time = TimeUtils.millis();
+                            }
+                            if (anim_data.duration > TimeUtils.timeSinceMillis(anim_data.start_time)) {
+                                if (anim_data.start_rotation_angles != null) {
+                                    Float XrotAng = anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotX;
+                                    anim_data.prevRotX=anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
+                                    Float YrotAng = anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotY;
+                                    anim_data.prevRotY=anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
+                                    Float ZrotAng = anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotZ;
+                                    anim_data.prevRotZ=anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
+                                    anim_matrix.set(new float[]{
+                                            (float) (Math.cos(YrotAng) * Math.cos(ZrotAng)),
+                                            (float) (Math.sin(XrotAng) * Math.sin(YrotAng) * Math.cos(ZrotAng) + Math.sin(ZrotAng) * Math.cos(XrotAng)),
+                                            (float) (Math.sin(XrotAng) * Math.sin(ZrotAng) - Math.sin(YrotAng) * Math.cos(XrotAng) * Math.cos(ZrotAng)),
+                                            (float) (-1 * Math.sin(ZrotAng) * Math.cos(YrotAng)),
+                                            (float) (-1 * Math.sin(XrotAng) * Math.sin(YrotAng) * Math.sin(ZrotAng) + Math.cos(XrotAng) * Math.cos(ZrotAng)),
+                                            (float) (Math.sin(XrotAng) * Math.cos(ZrotAng) + Math.sin(YrotAng) * Math.sin(ZrotAng) * Math.cos(XrotAng)),
+                                            (float) Math.sin(YrotAng),
+                                            (float) (-1 * Math.sin(XrotAng) * Math.cos(YrotAng)),
+                                            (float) (Math.cos(XrotAng) * Math.cos(YrotAng))
+                                    });
+                                    quaternion.setFromMatrix(anim_matrix);
+                                    card.instance.transform.rotate(quaternion);
+                                }
+                                card.setCardPos(new Vector3(anim_data.startPos.x + anim_data.distanceX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.y + anim_data.distanceY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.z + anim_data.distanceZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)));
+                            }
+
+                            if (anim_data.duration <= TimeUtils.timeSinceMillis(anim_data.start_time)) {
+                                card.setCardPos(anim_data.endPos);
                                 CanTouch.need_to_delete3D.add(card);
                             }
                         }
@@ -220,6 +257,11 @@ public class GameScreen implements Screen {
                             } else {
                                 CanTouch.need_to_delete2D.add(card);
                             }
+                        }
+                        if (TimeUtils.timeSinceMillis(Time) > 6000) {
+
+                            card.sprite_doubleTouched();
+                            Time = TimeUtils.millis();
                         }
                         card.sprite.draw(spriteBatch);
                     }
@@ -247,7 +289,7 @@ public class GameScreen implements Screen {
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
                 modelBatch.begin(Server.player_now.camera);
                 modelBatch.render(table_instance, environment);
-                modelBatch.render(terrain_instance,environment);
+                modelBatch.render(terrain_instance, environment);
                 for (Card card : decks) {
                     modelBatch.render(card.instance, environment);
                 }
@@ -291,7 +333,7 @@ public class GameScreen implements Screen {
                 font.draw(spriteBatch, "Game Over ", Gdx.graphics.getWidth() / 2 - Gdx.graphics.getWidth() / 5, Gdx.graphics.getHeight() / 2);
                 font.getData().setScale(3);
                 for (int i = 0; i < Server.players_count; i++) {
-                    font.draw(spriteBatch, Server.players[i].name + "  get " + Server.players[i].win_points + " win points", Gdx.graphics.getWidth() / -Gdx.graphics.getWidth() / 5, Gdx.graphics.getHeight() /2.5f-70*i);
+                    font.draw(spriteBatch, Server.players[i].name + "  get " + Server.players[i].win_points + " win points", Gdx.graphics.getWidth() / -Gdx.graphics.getWidth() / 5, Gdx.graphics.getHeight() / 2.5f - 70 * i);
                 }
                 spriteBatch.end();
             }

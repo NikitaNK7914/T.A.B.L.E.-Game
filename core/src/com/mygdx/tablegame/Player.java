@@ -2,6 +2,7 @@ package com.mygdx.tablegame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -40,7 +41,7 @@ public class Player {
         health = 20;
         power_points = 0;
         win_points = 0;
-        hand_size = 5;
+        hand_size = 1;
         camera.update();
         deck_pos = new Vector3(13, 29.9f, 28);
         trash_pos = new Vector3(18, 29.7f, 28);
