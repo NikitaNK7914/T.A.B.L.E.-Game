@@ -153,7 +153,7 @@ public class Card extends Touchable {
 
     public void convertTo2D(Vector3 camera_pos) {
         if (!CanTouch.renderable_3d.contains(this)) CanTouch.renderable_3d.add(this);
-        animations3D.add(new Animation(update_pos(), camera_pos, 6000,new Vector3(0,0,0),new Vector3(90,0,0), "convert2D"));
+        animations3D.add(new Animation(update_pos(), camera_pos, 5000,new Vector3(0,0,0),new Vector3(-90,0,0), "convert2D"));
     }
 
     public void calculate_inHand_pos(int hand_size, int index, boolean set) {

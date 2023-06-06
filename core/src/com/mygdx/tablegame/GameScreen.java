@@ -73,6 +73,7 @@ public class GameScreen implements Screen {
     Matrix3 anim_matrix = new Matrix3();
     Matrix4 matrix4 = new Matrix4();
     Quaternion quaternion = new Quaternion();
+    CameraAnimation cameraAnimation;
 
     public GameScreen() {
         modelBatch = new ModelBatch();
@@ -139,7 +140,7 @@ public class GameScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 inputMultiplexer.clear();
                 inputMultiplexer.addProcessor(run_stage);
-                //inputMultiplexer.addProcessor(Server.player_now.inputController);
+                inputMultiplexer.addProcessor(Server.player_now.inputController);
                 Server.refresh_market();
                 GameController.state = GameState.RUN;
             }
@@ -174,6 +175,7 @@ public class GameScreen implements Screen {
         for (int i = 0; i < Server.players_count; i++) {
             player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].power_points;
         }
+        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 50, -70), 1000, new Vector3(30, 30, 30), "test");
     }
 
     @Override
@@ -191,7 +193,6 @@ public class GameScreen implements Screen {
                 Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
                 ScreenUtils.clear(Color.SKY);
-                Server.player_now.camera.update();
                 modelBatch.begin(Server.player_now.camera);
                 modelBatch.render(table_instance, environment);
                 modelBatch.render(terrain_instance, environment);
@@ -206,28 +207,29 @@ public class GameScreen implements Screen {
                                 anim_data.start_time = TimeUtils.millis();
                             }
                             if (anim_data.duration > TimeUtils.timeSinceMillis(anim_data.start_time)) {
+                                long start_time = anim_data.start_time;
                                 if (anim_data.start_rotation_angles != null) {
-                                    Float XrotAng = anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotX;
-                                    anim_data.prevRotX=anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
-                                    Float YrotAng = anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotY;
-                                    anim_data.prevRotY=anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
-                                    Float ZrotAng = anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)-anim_data.prevRotZ;
-                                    anim_data.prevRotZ=anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration);
+                                    Float XrotAng = anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotX;
+                                    anim_data.prevRotX += XrotAng;
+                                    Float YrotAng = anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotY;
+                                    anim_data.prevRotY += YrotAng;
+                                    Float ZrotAng = anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotZ;
+                                    anim_data.prevRotZ += ZrotAng;
                                     anim_matrix.set(new float[]{
-                                            (float) (Math.cos(YrotAng) * Math.cos(ZrotAng)),
-                                            (float) (Math.sin(XrotAng) * Math.sin(YrotAng) * Math.cos(ZrotAng) + Math.sin(ZrotAng) * Math.cos(XrotAng)),
-                                            (float) (Math.sin(XrotAng) * Math.sin(ZrotAng) - Math.sin(YrotAng) * Math.cos(XrotAng) * Math.cos(ZrotAng)),
-                                            (float) (-1 * Math.sin(ZrotAng) * Math.cos(YrotAng)),
-                                            (float) (-1 * Math.sin(XrotAng) * Math.sin(YrotAng) * Math.sin(ZrotAng) + Math.cos(XrotAng) * Math.cos(ZrotAng)),
-                                            (float) (Math.sin(XrotAng) * Math.cos(ZrotAng) + Math.sin(YrotAng) * Math.sin(ZrotAng) * Math.cos(XrotAng)),
-                                            (float) Math.sin(YrotAng),
-                                            (float) (-1 * Math.sin(XrotAng) * Math.cos(YrotAng)),
-                                            (float) (Math.cos(XrotAng) * Math.cos(YrotAng))
+                                            MathUtils.cosDeg(YrotAng) * MathUtils.cosDeg(ZrotAng),
+                                            MathUtils.sinDeg(XrotAng) * MathUtils.sinDeg(YrotAng) * MathUtils.cosDeg(ZrotAng) + MathUtils.sinDeg(ZrotAng) * MathUtils.cosDeg(XrotAng),
+                                            MathUtils.sinDeg(XrotAng) * MathUtils.sinDeg(ZrotAng) - MathUtils.sinDeg(YrotAng) * MathUtils.cosDeg(XrotAng) * MathUtils.cosDeg(ZrotAng),
+                                            -1 * MathUtils.sinDeg(ZrotAng) * MathUtils.cosDeg(YrotAng),
+                                            -1 * MathUtils.sinDeg(XrotAng) * MathUtils.sinDeg(YrotAng) * MathUtils.sinDeg(ZrotAng) + MathUtils.cosDeg(XrotAng) * MathUtils.cosDeg(ZrotAng),
+                                            MathUtils.sinDeg(XrotAng) * MathUtils.cosDeg(ZrotAng) + MathUtils.sinDeg(YrotAng) * MathUtils.sinDeg(ZrotAng) * MathUtils.cosDeg(XrotAng),
+                                            MathUtils.sinDeg(YrotAng),
+                                            -1 * MathUtils.sinDeg(XrotAng) * MathUtils.cosDeg(YrotAng),
+                                            MathUtils.cosDeg(XrotAng) * MathUtils.cosDeg(YrotAng)
                                     });
                                     quaternion.setFromMatrix(anim_matrix);
                                     card.instance.transform.rotate(quaternion);
                                 }
-                                card.setCardPos(new Vector3(anim_data.startPos.x + anim_data.distanceX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.y + anim_data.distanceY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.z + anim_data.distanceZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)));
+                                card.setCardPos(new Vector3(anim_data.startPos.x + anim_data.distanceX * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration), anim_data.startPos.y + anim_data.distanceY * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration), anim_data.startPos.z + anim_data.distanceZ * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration)));
                             }
 
                             if (anim_data.duration <= TimeUtils.timeSinceMillis(anim_data.start_time)) {
@@ -244,6 +246,24 @@ public class GameScreen implements Screen {
                     CanTouch.need_to_delete3D.remove(0);
                 }
                 modelBatch.end();
+                if (cameraAnimation != null) {
+                    if (cameraAnimation.start_time == -1) {
+                        cameraAnimation.start_time = TimeUtils.millis();
+                    }
+                }
+                if (cameraAnimation != null) {
+                    if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.start_time) && cameraAnimation != null) {
+                        Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
+                        Server.player_now.camera.lookAt(cameraAnimation.start_look_pos.x + cameraAnimation.delta_lookX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.start_look_pos.y + cameraAnimation.delta_lookY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.start_look_pos.z + cameraAnimation.delta_lookZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
+                        Server.player_now.camera.update();
+                        System.out.println(cameraAnimation.startPos.z);
+                    }
+                }
+                if (cameraAnimation != null) {
+                    if (cameraAnimation.duration <= TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
+                        cameraAnimation = null;
+                    }
+                }
                 spriteBatch.begin();
                 if (!CanTouch.renderable_2d.isEmpty()) {
                     for (Card card : CanTouch.renderable_2d) {

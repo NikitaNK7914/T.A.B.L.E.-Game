@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.TimeUtils;
 
+import java.util.ArrayList;
+
 public class MyCameraInputController extends GestureDetector {
     /**
      * The button for rotating the camera.
@@ -94,6 +96,8 @@ public class MyCameraInputController extends GestureDetector {
     private float startX, startY;
     private final Vector3 tmpV1 = new Vector3();
     private final Vector3 tmpV2 = new Vector3();
+
+    ArrayList<CameraAnimation> animations=new ArrayList<>();
 
     protected static class CameraGestureListener extends GestureAdapter {
         public MyCameraInputController controller;
@@ -279,7 +283,7 @@ public class MyCameraInputController extends GestureDetector {
         final float deltaY = (startY - screenY) / Gdx.graphics.getHeight();
         startX = screenX;
         startY = screenY;
-        return process(deltaX, deltaY, button);
+        return false;
     }
 
     @Override
