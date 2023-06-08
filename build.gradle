@@ -43,14 +43,14 @@ allprojects {
 project(":desktop") {
     apply plugin: "java-library"
 
-
     dependencies {
+        implementation 'tech.gusavila92:java-android-websocket-client:1.2.2'
+        implementation fileTree(dir: 'libs', include: ['*.jar'])
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-        
     }
 }
 
@@ -82,14 +82,16 @@ project(":android") {
 }
 
 project(":core") {
+
     apply plugin: "java-library"
-
-
     dependencies {
+        implementation 'tech.gusavila92:java-android-websocket-client:1.2.2'
+        implementation fileTree(dir: 'libs', include: ['*.jar'])
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        
+
     }
+
 }

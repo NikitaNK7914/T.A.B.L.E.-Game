@@ -42,8 +42,13 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
+
+import jdk.internal.net.http.common.Log;
+import tech.gusavila92.websocketclient.WebSocketClient;
 
 
 public class GameScreen implements Screen {
@@ -175,7 +180,8 @@ public class GameScreen implements Screen {
         for (int i = 0; i < Server.players_count; i++) {
             player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].power_points;
         }
-        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 50, -70), 1000, new Vector3(30, 30, 30), "test");
+        Vector3 temp=new Vector3(Server.player_now.camera.position);
+        cameraAnimation = new CameraAnimation(temp, new Vector3(50, 50, -70), 6000, new Vector3(0,0,0.0004f), "test");
     }
 
     @Override
@@ -252,17 +258,22 @@ public class GameScreen implements Screen {
                     }
                 }
                 if (cameraAnimation != null) {
-                    if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.start_time) && cameraAnimation != null) {
-                        Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
-                        Server.player_now.camera.lookAt(cameraAnimation.start_look_pos.x + cameraAnimation.delta_lookX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.start_look_pos.y + cameraAnimation.delta_lookY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.start_look_pos.z + cameraAnimation.delta_lookZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
+                    if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
+                       // Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
+                        float XZrotAngle= cameraAnimation.XZrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleXZ;
+                        cameraAnimation.prevRotAngleXZ+=XZrotAngle;
+                        float YrotAngle= cameraAnimation.YrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleY;
+                        cameraAnimation.prevRotAngleY+=YrotAngle;
+                        Server.player_now.camera.rotate(XZrotAngle,0,cameraAnimation.camera_pos.y,0);
+                        Server.player_now.camera.rotate(cameraAnimation.tmp_look_at,YrotAngle);
                         Server.player_now.camera.update();
-                        System.out.println(cameraAnimation.startPos.z);
                     }
                 }
                 if (cameraAnimation != null) {
                     if (cameraAnimation.duration <= TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
                         cameraAnimation = null;
                     }
+
                 }
                 spriteBatch.begin();
                 if (!CanTouch.renderable_2d.isEmpty()) {
@@ -441,5 +452,62 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
 
+    }
+
+    private WebSocketClient webSocketClient;
+
+
+    private void createWebSocketClient() {
+        URI uri;
+        try {
+            // Connect to local host
+            uri = new URI("ws://192.0.0.1:8001/");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        webSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen() {
+                webSocketClient.send("{\"session\":id_session, \"request\":\"ADD\"}"); // REQUEST ADD {"session":id_session, "request":"ADD"}
+            }
+
+            @Override
+            public void onTextReceived(String s) {
+                // you actions when receive message
+            }
+
+            @Override
+            public void onBinaryReceived(byte[] data) {
+            }
+
+            @Override
+            public void onPingReceived(byte[] data) {
+            }
+
+            @Override
+            public void onPongReceived(byte[] data) {
+            }
+
+            @Override
+            public void onException(Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            @Override
+            public void onCloseReceived() {
+                webSocketClient.send("{\"session\":id_session, \"request\":\"DELETE\"}"); // REQUEST DELETE {"session":id_session, "request":"DELETE"}
+            }
+        };
+
+        webSocketClient.setConnectTimeout(10000);
+        webSocketClient.setReadTimeout(60000);
+        webSocketClient.enableAutomaticReconnection(5000);
+        webSocketClient.connect();
+    }
+
+    public void sendMessage(String message) {
+        webSocketClient.send(message);
     }
 }
