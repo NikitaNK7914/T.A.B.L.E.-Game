@@ -23,28 +23,32 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.swing.plaf.ScrollBarUI;
 import javax.swing.text.View;
 
+import tech.gusavila92.websocketclient.WebSocketClient;
+
 public class MainMenuScreen implements Screen {
-    final GameController game;
-    SpriteBatch spriteBatch=new SpriteBatch();
-    BitmapFont font=new BitmapFont();
-    Stage stage;
-   static  ArrayList<String> names=new ArrayList<>();
-    Stage players_create_stage;
-    Skin skin;
-    TextureAtlas atlas;
-    PerspectiveCamera camera;
-    TextButton start_button;
-    TextButton rules_button;
-    TextButton settings_button;
-    TextButton add_player_button;
-    TextButton begin_game_button;
-    TextField enter_players_name;
-    VerticalGroup verticalGroup;
+    private final GameController game;
+    private SpriteBatch spriteBatch=new SpriteBatch();
+    private BitmapFont font=new BitmapFont();
+    private Stage stage;
+    public static  ArrayList<String> names=new ArrayList<>();
+    private Stage players_create_stage;
+    private Skin skin;
+    private TextureAtlas atlas;
+    private PerspectiveCamera camera;
+    private TextButton start_button;
+    private TextButton rules_button;
+    private TextButton settings_button;
+    private TextButton add_player_button;
+    private TextButton begin_game_button;
+    private TextField enter_players_name;
+    private VerticalGroup verticalGroup;
 
     public MainMenuScreen(GameController gam) {
         verticalGroup = new VerticalGroup();
@@ -138,6 +142,9 @@ public class MainMenuScreen implements Screen {
         players_create_stage.addActor(enter_players_name);
         players_create_stage.addActor(begin_game_button);
         players_create_stage.addActor(add_player_button);
+        createWebSocketClient();
+        sendMessage("test conn");
+
     }
 
     @Override
@@ -193,5 +200,61 @@ public class MainMenuScreen implements Screen {
     @Override
     public void dispose() {
 
+    }
+    private WebSocketClient webSocketClient;
+
+
+    private void createWebSocketClient() {
+        URI uri;
+        try {
+            // Connect to local host
+            uri = new URI("ws://192.168.1.42:8001/");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        webSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen() {
+                webSocketClient.send("{\"session\":id_session, \"request\":\"ADD\"}"); // REQUEST ADD {"session":id_session, "request":"ADD"}
+            }
+
+            @Override
+            public void onTextReceived(String s) {
+                // you actions when receive message
+            }
+
+            @Override
+            public void onBinaryReceived(byte[] data) {
+            }
+
+            @Override
+            public void onPingReceived(byte[] data) {
+            }
+
+            @Override
+            public void onPongReceived(byte[] data) {
+            }
+
+            @Override
+            public void onException(Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            @Override
+            public void onCloseReceived() {
+                webSocketClient.send("{\"session\":id_session, \"request\":\"DELETE\"}"); // REQUEST DELETE {"session":id_session, "request":"DELETE"}
+            }
+        };
+
+        webSocketClient.setConnectTimeout(10000);
+        webSocketClient.setReadTimeout(60000);
+        webSocketClient.enableAutomaticReconnection(5000);
+        webSocketClient.connect();
+    }
+
+    public void sendMessage(String message) {
+        webSocketClient.send(message);
     }
 }

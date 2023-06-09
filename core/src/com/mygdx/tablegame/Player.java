@@ -1,36 +1,40 @@
 package com.mygdx.tablegame;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 public class Player {
-    Integer player_number;
-    PerspectiveCamera camera;
-    MyCameraInputController inputController;
-    Integer health;
-    Integer power_points;
-    ElementUI[] health_bar;
-    Integer win_points;
-    Integer hand_size;
-    Integer armor = 0;
-    ElementUI[] armor_bar;
-    ArrayList<Card> deck;
-    Vector3 deck_pos;
-    ArrayList<Card> hand;
-    ArrayList<Card> trash;
-    ArrayList<Card> on_table_cards;
-    Vector3 trash_pos;
-    Vector3 played_card_pos;
-    String name;
+    public final Integer player_number;
+    public PerspectiveCamera camera;
+    public MyCameraInputController inputController;
+    private Integer health;
+    private Integer power_points;
+    public ElementUI[] health_bar;
+    public Integer win_points;
+    public final Integer normal_hand_size;
+    private Integer hand_size;
+    private Integer armor = 0;
+    public ElementUI[] armor_bar;
+    public ArrayList<Card> deck;
+    public Vector3 deck_pos;
+    public ArrayList<Card> hand;
+    public ArrayList<Card> trash;
+    public ArrayList<Card> on_table_cards;
+    public Vector3 trash_pos;
+    public Vector3 played_card_pos;
+    public String name;
+    private int card_rot_modifier;
+
+
 
     public Player(Vector3 pos, int num) {
+        Gdx.app.setLogLevel(Application.LOG_ERROR);
         player_number = num;
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.near = 1;
@@ -41,7 +45,8 @@ public class Player {
         health = 20;
         power_points = 0;
         win_points = 0;
-        hand_size = 1;
+        normal_hand_size = 5;
+        hand_size = normal_hand_size;
         camera.update();
         deck_pos = new Vector3(13, 29.9f, 28);
         trash_pos = new Vector3(18, 29.7f, 28);
@@ -61,6 +66,46 @@ public class Player {
             armor_bar[i].change_texture(-1);
             armor_bar[i].sprite.setPosition(health_bar[0].sprite.getWidth() * health_bar.length + 30 + armor_bar[i].sprite.getHeight() * i, 50 + armor_bar[i].sprite.getHeight() * player_number + 45 * player_number);
         }
+    }
+
+    public Integer getHealth() {
+        return health;
+    }
+
+    public Integer getPower_points() {
+        return power_points;
+    }
+
+    public Integer getHand_size() {
+        return hand_size;
+    }
+
+    public Integer getArmor() {
+        return armor;
+    }
+
+    public int getCard_rot_modifier() {
+        return card_rot_modifier;
+    }
+
+    public void setPower_points(Integer power_points) {
+        if(power_points>=0)
+            this.power_points = power_points;
+        else Gdx.app.log(GameController.log_tag,"Player.power_points must be >=0");
+    }
+
+    public void setHand_size(Integer hand_size) {
+        if(hand_size>=0) this.hand_size = hand_size;
+        else Gdx.app.log(GameController.log_tag,"Player.hand_size must be >=0");
+    }
+
+    public void setArmor(Integer armor) {
+        if(armor>=0) this.armor = armor;
+        else Gdx.app.log(GameController.log_tag,"Player.armor must be >=0");
+    }
+
+    public void setCard_rot_modifier(int card_rot_modifier) {
+        this.card_rot_modifier = card_rot_modifier%360;
     }
 
 
@@ -88,7 +133,7 @@ public class Player {
             hand.get(i).calculate_inHand_pos(hand_size, i, false);
             hand.get(i).animations2D.clear();
             hand.get(i).convertTo2D(camera.position);
-            hand.get(i).animations2D.add(hand.get(i).doAnimation2D(new Vector2(Gdx.graphics.getWidth() / 2f, 600), new Vector2(hand.get(i).inHandX, hand.get(i).inHandY), 20, hand.get(i).inHand_rotation - hand.get(i).sprite.getRotation(), "laying_out_card"));
+            hand.get(i).animations2D.add(hand.get(i).doAnimation2D(new Vector2(Gdx.graphics.getWidth() / 2f, 600), new Vector2(hand.get(i).getInHandX(), hand.get(i).getInHandY()), 20, hand.get(i).getInHand_rotation() - hand.get(i).sprite.getRotation(), "laying_out_card"));
         }
     }
 
@@ -108,7 +153,7 @@ public class Player {
             hand.get(i).calculate_inHand_pos(hand_size, i, false);
 
         }
-        card.animations2D.add(card.doAnimation2D(new Vector2(Gdx.graphics.getWidth() / 2f, 600), new Vector2(card.inHandX, card.inHandY), 20, card.inHand_rotation - card.sprite.getRotation(), "laying_out_card"));
+        card.animations2D.add(card.doAnimation2D(new Vector2(Gdx.graphics.getWidth() / 2f, 600), new Vector2(card.getInHandX(), card.getInHandY()), 20, card.getInHand_rotation() - card.sprite.getRotation(), "laying_out_card"));
     }
 
     public void refresh_hands_positions() {
@@ -116,7 +161,7 @@ public class Player {
             hand.trimToSize();
             Card card = hand.get(i);
             card.calculate_inHand_pos(hand.size(), i, false);
-            card.animations2D.add(card.doAnimation2D(new Vector2(card.sprite.getX(), card.sprite.getY()), new Vector2(card.inHandX, card.inHandY), 10, card.inHand_rotation - card.sprite.getRotation(), "relocate_after_discard"));
+            card.animations2D.add(card.doAnimation2D(new Vector2(card.sprite.getX(), card.sprite.getY()), new Vector2(card.getInHandX(), card.getInHandY()), 10, card.getInHand_rotation() - card.sprite.getRotation(), "relocate_after_discard"));
         }
     }
 

@@ -10,7 +10,7 @@ public class Znak extends Card{
 
     @Override
     public void played() {
-        Server.player_now.power_points+=power_points;
-        GameScreen.player_UI_names[Server.player_now.player_number]=Server.player_now.name+"`s power points  : "+Server.player_now.power_points;
+        Server.player_now.setPower_points(Server.player_now.getPower_points()+power_points);
+        GameScreen.getPlayer_UI_names()[Server.player_now.player_number]=Server.player_now.name+"`s power points  : "+Server.player_now.getPower_points();
     }
 }

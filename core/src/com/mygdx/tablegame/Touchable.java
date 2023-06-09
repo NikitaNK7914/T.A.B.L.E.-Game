@@ -10,9 +10,9 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
 
 public class Touchable {
-    BoundingBox hitBox;
-    long prevTouchTime=TimeUtils.millis();
-    Sprite sprite;
+    protected BoundingBox hitBox;
+    protected long prevTouchTime=TimeUtils.millis();
+    protected Sprite sprite;
     public BoundingBox getHitBox() {return  hitBox;}
     public Rectangle getSpriteHitBox(){return sprite.getBoundingRectangle();}
     public void touched(){};

@@ -3,23 +3,23 @@ package com.mygdx.tablegame;
 import com.badlogic.gdx.math.Vector3;
 
 public class Animation {
-    long start_time;
-    Vector3 startPos;
-    Vector3 endPos;
-    float duration;
-    float distanceX;
-    float distanceY;
-    float distanceZ;
-    Vector3 start_rotation_angles;
-    Vector3 end_rotation_angles;
-    float delta_angleX;
-    float delta_angleY;
-    float delta_angleZ;
-    float prevRotX=0;
-    float prevRotY=0;
-    float prevRotZ=0;
-    boolean is3D;
-    String id;
+    public long start_time;
+    public  Vector3 startPos;
+    public  Vector3 endPos;
+    public float duration;
+    public  float distanceX;
+    public  float distanceY;
+    public  float distanceZ;
+    public Vector3 start_rotation_angles;
+    public Vector3 end_rotation_angles;
+    public float delta_angleX;
+    public float delta_angleY;
+    public float delta_angleZ;
+    public float prevRotX=0;
+    public float prevRotY=0;
+    public float prevRotZ=0;
+    public boolean is3D;
+    public String id;
 
     public Animation(Vector3 start, Vector3 end, float millis_time, String id) {
         is3D = true;
@@ -49,7 +49,6 @@ public class Animation {
         distanceZ = endPos.z - startPos.z;
         this.id = id;
     }
-
 
     public Animation() {
     }

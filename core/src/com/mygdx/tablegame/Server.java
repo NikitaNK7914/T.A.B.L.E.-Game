@@ -42,16 +42,19 @@ public class Server {
             player.deck_pos = new Vector3(13, 29.9f, 28);
             player.trash_pos = new Vector3(18, 29.7f, 28);
             player.played_card_pos = new Vector3(0, 30, 25);
+            player.setCard_rot_modifier(0);
             players[0] = player;
             Player player1 = new Player(new Vector3(30, 50, 0), 1);
             player1.deck_pos = new Vector3(18, 29.9f, -10);
             player1.trash_pos = new Vector3(18, 29.7f, -15);
-            player1.played_card_pos = new Vector3(19, 30, -8);
+            player1.played_card_pos = new Vector3(19, 30, -3);
+            player1.setCard_rot_modifier(-90);
             players[1] = player1;
             Player player2 = new Player(new Vector3(0, 50, -40), 2);
             player2.deck_pos = new Vector3(-13, 29.9f, -28);
             player2.trash_pos = new Vector3(-18, 29.7f, -28);
             player2.played_card_pos = new Vector3(0, 30, -25);
+            player2.setCard_rot_modifier(180);
             players[2] = player2;
 
         }
@@ -82,16 +85,19 @@ public class Server {
             for (int j = 0; j < 6; j++) {
                 Znak card = new Znak();
                 card.setCardPos(players[i].deck_pos);
+                card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0, players[i].getCard_rot_modifier());
                 players[i].deck.add(card);
             }
             for (int j = 0; j < 3; j++) {
                 Pshik card = new Pshik();
                 card.setCardPos(players[i].deck_pos);
+                card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0, players[i].getCard_rot_modifier());
                 players[i].deck.add(card);
             }
             for (int j = 0; j < 1; j++) {
                 Fire_ball card = new Fire_ball();
                 card.setCardPos(players[i].deck_pos);
+                card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0, players[i].getCard_rot_modifier());
                 players[i].deck.add(card);
             }
             Collections.shuffle(players[i].deck);
@@ -141,7 +147,7 @@ public class Server {
             switch (container_id) {
                 case ("hand"): {
                     if (!players[player_num].hand.isEmpty()) {
-                        int i = MathUtils.random(0, players[player_num].hand_size - 1);
+                        int i = MathUtils.random(0, players[player_num].getHand_size() - 1);
                         card = players[player_num].hand.get(i);
                         players[player_num].hand.remove(i);
                     }
@@ -168,97 +174,106 @@ public class Server {
 
     public static void refresh_market() {
         int y = market_deck.size();
-        for (int i = 0; i < 5 ; i++) {
+        if (!market_deck.isEmpty()) {
+            for (Card card : market_deck) {
+                CanTouch.renderable_3d.remove(card);
+            }
+        }
+        market_deck.clear();
+        for (int i = 0; i < 5; i++) {
             Card card = Server.get_card(-1, "main_deck");
             CanTouch.renderable_3d.add(card);
             market_deck.add(card);
+            System.out.println(market_deck.size());
         }
         for (int i = 0; i < 5; i++) {
             Card card = market_deck.get(i);
             if (turns_lasts != 0) {
-                if (players_count == 2) {
+                if (players_count == 2 && player_now.player_number == 0) {
+                } else {
                     card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -180);
                 }
                 if (players_count == 3 && player_now.player_number == 0)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -180);
+                 card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -180);
                 if (players_count == 3 && player_now.player_number == 1)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
-                if (players_count == 3 && player_now.player_number == 2)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
-                if (players_count == 4 && player_now.player_number==0)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
-                if (players_count == 4 && player_now.player_number==1)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
-                if (players_count == 4 && player_now.player_number==2)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
-                if (players_count == 4 && player_now.player_number==3)
-                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
+                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, 90);
+                //if (players_count == 3 && player_now.player_number == 2)
+                    //card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -180);
+                if (players_count == 4 && player_now.player_number == 0)
+                    // card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
+                    if (players_count == 4 && player_now.player_number == 1)
+                        card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -90);
+                if (players_count == 4 && player_now.player_number == 2)
+                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -180);
+                if (players_count == 4 && player_now.player_number == 3)
+                    card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, -270);
             }
+            System.out.println(player_now.camera.position);
             if (market_deck.get(i).in_market) {
                 if (players_count == 2) {
                     if (player_now.player_number % 2 == 0) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     } else {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 3) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.getHitBox().getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x - card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 4) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.getHitBox().getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 3) {
-                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(market_deck.get(i).update_pos(), new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.getHitBox().getDepth() * i), 2000, "to_market_deck"));
                     }
                 }
 
             } else {
                 if (players_count == 2) {
                     if (player_now.player_number % 2 == 0) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     } else {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 3) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.getHitBox().getWidth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x - card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                 }
                 if (players_count == 4) {
                     if (player_now.player_number == 0) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 1) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(-market_deck_pos.x, market_deck_pos.y, market_deck_pos.z - card.getHitBox().getDepth() * i), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 2) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.box.getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x + card.getHitBox().getWidth() * i, market_deck_pos.y, -market_deck_pos.z), 2000, "to_market_deck"));
                     }
                     if (player_now.player_number == 3) {
-                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.box.getDepth() * i), 2000, "to_market_deck"));
+                        card.animations3D.add(new Animation(main_deck_pos, new Vector3(market_deck_pos.x, market_deck_pos.y, -market_deck_pos.z + card.getHitBox().getDepth() * i), 2000, "to_market_deck"));
                     }
                 }
             }

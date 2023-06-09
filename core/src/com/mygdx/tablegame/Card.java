@@ -23,30 +23,29 @@ import java.util.Arrays;
 
 
 public class Card extends Touchable {
-    final static Model card_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("card_model1.g3dj"));
-    Vector3 card_pos = new Vector3(0, 0, 0);
-    ModelInstance instance;
-    Integer cost=3;
-    Integer power_points;
-    Integer win_points;
-    boolean is3D;
-    BoundingBox box;
-    Sprite sprite;
-    static int lay_down_cards = 0;
-    ArrayList<Generator> animations2D;
-    ArrayList<Animation> animations3D;
-    float max_rotate_angel = 8;
-    float inHandX;
-    float inHandY;
-    float inHand_rotation;
-    Vector3 temp_camera_pos;
-    Vector3 temp_on_table_pos;
-    Plane plane;
-    boolean in_market=false;
-    int texture_id;
+    private final static Model card_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("card_model1.g3dj"));
+    public Vector3 card_pos = new Vector3(0, 0, 0);
+    public ModelInstance instance;
+    protected Integer cost = 3;
+    protected Integer power_points;
+    protected Integer win_points;
+    public boolean is3D;
+    private  BoundingBox box;
+    public Sprite sprite;
+    private static int lay_down_cards = 0;
+    public ArrayList<Generator> animations2D;
+    public ArrayList<Animation> animations3D;
+    private float max_rotate_angel = 8;
+    private float inHandX;
+    private float inHandY;
+    private float inHand_rotation;
+    private Vector3 temp_camera_pos;
+    private Vector3 temp_on_table_pos;
+    public boolean in_market = false;
+    private int texture_id;
 
     public Card(int texture_id) {
-        this.texture_id=texture_id;
+        this.texture_id = texture_id;
         sprite = new Sprite(TextureStorage.textures2d[texture_id][0], TextureStorage.textures2d[texture_id][0].getWidth(), TextureStorage.textures2d[texture_id][0].getHeight());
         sprite.setCenter(TextureStorage.textures2d[texture_id][0].getWidth() / 2, TextureStorage.textures2d[texture_id][0].getHeight() / 2);
         sprite.setOrigin(sprite.getWidth(), sprite.getHeight());
@@ -61,8 +60,25 @@ public class Card extends Touchable {
         animations2D = new ArrayList<>();
         animations3D = new ArrayList<>();
         instance.calculateBoundingBox(box).mul(instance.transform);
-        plane=new Plane(box.getCorner000(new Vector3()),box.getCorner001(new Vector3()),box.getCorner010(new Vector3()));
     }
+
+    public float getMax_rotate_angel() {
+        return max_rotate_angel;
+    }
+
+    public float getInHandX() {
+        return inHandX;
+    }
+
+    public float getInHandY() {
+        return inHandY;
+    }
+
+    public float getInHand_rotation() {
+        return inHand_rotation;
+    }
+
+
 
     public void change_texture(int type) {
         if (type == 1) {
@@ -112,8 +128,9 @@ public class Card extends Touchable {
         card_pos = pos;
         instance.transform.setTranslation(card_pos);
     }
-    public void setCardPos(float x,float y, float z) {
-        card_pos.set(x,y,z);
+
+    public void setCardPos(float x, float y, float z) {
+        card_pos.set(x, y, z);
         instance.transform.setTranslation(card_pos);
     }
 
@@ -131,8 +148,9 @@ public class Card extends Touchable {
     }
 
     public void doubleTouched() {
-        if (Server.market_deck.contains(this) && Server.player_now.power_points>=cost) {
-            Server.player_now.power_points-=cost;
+        if (Server.market_deck.contains(this) && Server.player_now.getPower_points() >= cost) {
+            Server.player_now.setPower_points(Server.player_now.getPower_points()-cost);
+            GameScreen.getPlayer_UI_names()[Server.player_now.player_number] = Server.player_now.name + "`s power points  : " + Server.player_now.getPower_points();
             animations3D.add(new Animation(update_pos(), Server.player_now.trash_pos, 2000, "market_to_trash"));
         }
     }
@@ -142,7 +160,7 @@ public class Card extends Touchable {
     }
 
     public void sprite_doubleTouched() {
-        convertTo3D(Server.player_now.camera.position, new Vector3(Server.player_now.played_card_pos.x+MathUtils.random(-1.2f,1.2f),Server.player_now.played_card_pos.y,Server.player_now.played_card_pos.z+ MathUtils.random(-1.2f,1.2f)));
+        convertTo3D(Server.player_now.camera.position, new Vector3(Server.player_now.played_card_pos.x + MathUtils.random(-1.2f, 1.2f), Server.player_now.played_card_pos.y, Server.player_now.played_card_pos.z + MathUtils.random(-1.2f, 1.2f)));
     }
 
     public void convertTo3D(Vector3 camera_pos, Vector3 target_pos) {
@@ -153,8 +171,9 @@ public class Card extends Touchable {
 
     public void convertTo2D(Vector3 camera_pos) {
         if (!CanTouch.renderable_3d.contains(this)) CanTouch.renderable_3d.add(this);
-        animations3D.add(new Animation(update_pos(), camera_pos, 5000,new Vector3(0,0,0),new Vector3(-90,0,0), "convert2D"));
+        animations3D.add(new Animation(update_pos(), camera_pos, 2000, new Vector3(0, 0, 0), new Vector3(90, 0, 0), "convert2D"));
     }
+
 
     public void calculate_inHand_pos(int hand_size, int index, boolean set) {
         int n;
@@ -215,7 +234,7 @@ public class Card extends Touchable {
             }
             case ("to_market_deck"): {
                 if (!CanTouch.collisions.contains(this)) CanTouch.collisions.add(this);
-                in_market=true;
+                in_market = true;
                 break;
             }
             case ("to_trash_end"): {
@@ -241,7 +260,7 @@ public class Card extends Touchable {
                 CanTouch.renderable_2d.remove(this);
                 CanTouch.sprite_collisions.remove(this);
                 CanTouch.renderable_3d.add(this);
-                animations3D.add(new Animation(temp_camera_pos, temp_on_table_pos, 2000, "played_from_hand"));
+                animations3D.add(new Animation(temp_camera_pos, temp_on_table_pos, 2000, new Vector3(0, 0, 0), new Vector3(-90, 0, 0), "played_from_hand"));
                 Server.player_now.hand.remove(this);
                 Server.player_now.refresh_hands_positions();
                 is3D = true;

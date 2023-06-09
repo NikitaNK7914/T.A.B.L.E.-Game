@@ -254,15 +254,9 @@ public class MyCameraInputController extends GestureDetector {
 
     protected boolean process(float deltaX, float deltaY, int button) {
         if (button == rotateButton) {
-            if (GameScreen.camera_type) {
-                tmpV1.set(camera.direction).crs(camera.up).y = 0f;
-                camera.rotate(tmpV1.nor(), deltaY * rotateAngle);
-                camera.rotate(Vector3.Y, deltaX * -rotateAngle);
-            } else {
                 tmpV1.set(camera.direction).crs(camera.up).y = 0f;
                 camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
                 camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
-            }
         } else if (button == translateButton) {
             camera.translate(tmpV1.set(camera.direction).crs(camera.up).nor().scl(-deltaX * translateUnits));
             camera.translate(tmpV2.set(camera.up).scl(-deltaY * translateUnits));
@@ -283,7 +277,7 @@ public class MyCameraInputController extends GestureDetector {
         final float deltaY = (startY - screenY) / Gdx.graphics.getHeight();
         startX = screenX;
         startY = screenY;
-        return false;
+        return process(deltaX, deltaY, button);
     }
 
     @Override

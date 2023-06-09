@@ -52,33 +52,37 @@ import tech.gusavila92.websocketclient.WebSocketClient;
 
 
 public class GameScreen implements Screen {
-    Model table_model;
-    Model terrain_model;
-    ModelInstance table_instance;
-    ModelInstance terrain_instance;
-    ModelBatch modelBatch;
-    Environment environment;
-    static SpriteBatch spriteBatch;
-    long Time;
-    Sprite black_fon;
-    Texture black = new Texture(Gdx.files.internal("black.png"));
-    Stage selection_stage;
-    Stage changing_stage;
-    TextButton change_button;
-    static TextButton[] selection_buttons;
-    static BitmapFont font;
-    ArrayList<Deck> decks = new ArrayList<>();
-    TextButton end_turn_button;
-    Stage run_stage;
-    InputMultiplexer inputMultiplexer = new InputMultiplexer();
-    static String[] player_UI_names = new String[4];
-    static boolean camera_type = false;
-    TextButton camera_button;
-    Animation anim_data = new Animation();
-    Matrix3 anim_matrix = new Matrix3();
-    Matrix4 matrix4 = new Matrix4();
-    Quaternion quaternion = new Quaternion();
-    CameraAnimation cameraAnimation;
+    private Model table_model;
+    private  Model terrain_model;
+    private ModelInstance table_instance;
+    private ModelInstance terrain_instance;
+    private ModelBatch modelBatch;
+    private Environment environment;
+    private static SpriteBatch spriteBatch;
+    private long Time;
+    private Sprite black_fon;
+    private Texture black = new Texture(Gdx.files.internal("black.png"));
+    private Stage selection_stage;
+    private Stage changing_stage;
+    private TextButton change_button;
+    private static TextButton[] selection_buttons;
+    private static BitmapFont font;
+    private ArrayList<Deck> decks = new ArrayList<>();
+    private TextButton end_turn_button;
+    private Stage run_stage;
+    private InputMultiplexer inputMultiplexer = new InputMultiplexer();
+    private static String[] player_UI_names = new String[4];
+    private static boolean camera_type = false;
+    private TextButton camera_button;
+    public static String[] getPlayer_UI_names() {
+        return player_UI_names;
+    }
+
+    private Animation anim_data = new Animation();
+    private Matrix3 anim_matrix = new Matrix3();
+    private Matrix4 matrix4 = new Matrix4();
+    private Quaternion quaternion = new Quaternion();
+    private CameraAnimation cameraAnimation;
 
     public GameScreen() {
         modelBatch = new ModelBatch();
@@ -118,13 +122,13 @@ public class GameScreen implements Screen {
         for (int i = 0; i < Server.players_count; i++) {
             Deck deck = new Deck();
             if (Server.players_count != 2 && i % 2 == 1) {
-                deck.instance.transform.rotate(0, deck.box.getCenterY(), 0, 90);
+                deck.instance.transform.rotate(0, deck.getHitBox().getCenterY(), 0, 90);
             }
             deck.setCardPos(Server.players[i].deck_pos);
             decks.add(deck);
             Deck deck1 = new Deck();
             if (Server.players_count != 2 && i % 2 == 1) {
-                deck1.instance.transform.rotate(0, deck1.box.getCenterY(), 0, 90);
+                deck1.instance.transform.rotate(0, deck1.getHitBox().getCenterY(), 0, 90);
             }
             deck1.setCardPos(Server.players[i].trash_pos);
             decks.add(deck1);
@@ -158,8 +162,8 @@ public class GameScreen implements Screen {
         end_turn_button.setPosition(Gdx.graphics.getWidth() - end_turn_button.getWidth(), Gdx.graphics.getHeight() - end_turn_button.getHeight());
         end_turn_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                Server.player_now.power_points = 0;
-                GameScreen.player_UI_names[Server.player_now.player_number] = Server.player_now.name + "`s power points  : " + Server.player_now.power_points;
+                Server.player_now.setPower_points(0);
+                GameScreen.player_UI_names[Server.player_now.player_number] = Server.player_now.name + "`s power points  : " + Server.player_now.getPower_points();
                 Server.turn_ended();
             }
         });
@@ -176,12 +180,12 @@ public class GameScreen implements Screen {
         });
         run_stage = new Stage();
         run_stage.addActor(end_turn_button);
-        run_stage.addActor(camera_button);
+        //run_stage.addActor(camera_button);
         for (int i = 0; i < Server.players_count; i++) {
-            player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].power_points;
+            player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].getPower_points();
         }
         Vector3 temp=new Vector3(Server.player_now.camera.position);
-        cameraAnimation = new CameraAnimation(temp, new Vector3(50, 50, -70), 6000, new Vector3(0,0,0.0004f), "test");
+        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 100, -70), 6000, new Vector3(0,60,0), "test");
     }
 
     @Override
@@ -257,14 +261,15 @@ public class GameScreen implements Screen {
                         cameraAnimation.start_time = TimeUtils.millis();
                     }
                 }
+                /*
                 if (cameraAnimation != null) {
                     if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
-                       // Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
+                        //Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
                         float XZrotAngle= cameraAnimation.XZrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleXZ;
                         cameraAnimation.prevRotAngleXZ+=XZrotAngle;
                         float YrotAngle= cameraAnimation.YrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleY;
                         cameraAnimation.prevRotAngleY+=YrotAngle;
-                        Server.player_now.camera.rotate(XZrotAngle,0,cameraAnimation.camera_pos.y,0);
+                        Server.player_now.camera.rotate(XZrotAngle,0,cameraAnimation.endPos.y,0);
                         Server.player_now.camera.rotate(cameraAnimation.tmp_look_at,YrotAngle);
                         Server.player_now.camera.update();
                     }
@@ -274,7 +279,7 @@ public class GameScreen implements Screen {
                         cameraAnimation = null;
                     }
 
-                }
+                }*/
                 spriteBatch.begin();
                 if (!CanTouch.renderable_2d.isEmpty()) {
                     for (Card card : CanTouch.renderable_2d) {
@@ -289,11 +294,7 @@ public class GameScreen implements Screen {
                                 CanTouch.need_to_delete2D.add(card);
                             }
                         }
-                        if (TimeUtils.timeSinceMillis(Time) > 6000) {
 
-                            card.sprite_doubleTouched();
-                            Time = TimeUtils.millis();
-                        }
                         card.sprite.draw(spriteBatch);
                     }
                 }
@@ -452,62 +453,5 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
 
-    }
-
-    private WebSocketClient webSocketClient;
-
-
-    private void createWebSocketClient() {
-        URI uri;
-        try {
-            // Connect to local host
-            uri = new URI("ws://192.0.0.1:8001/");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        webSocketClient = new WebSocketClient(uri) {
-            @Override
-            public void onOpen() {
-                webSocketClient.send("{\"session\":id_session, \"request\":\"ADD\"}"); // REQUEST ADD {"session":id_session, "request":"ADD"}
-            }
-
-            @Override
-            public void onTextReceived(String s) {
-                // you actions when receive message
-            }
-
-            @Override
-            public void onBinaryReceived(byte[] data) {
-            }
-
-            @Override
-            public void onPingReceived(byte[] data) {
-            }
-
-            @Override
-            public void onPongReceived(byte[] data) {
-            }
-
-            @Override
-            public void onException(Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            @Override
-            public void onCloseReceived() {
-                webSocketClient.send("{\"session\":id_session, \"request\":\"DELETE\"}"); // REQUEST DELETE {"session":id_session, "request":"DELETE"}
-            }
-        };
-
-        webSocketClient.setConnectTimeout(10000);
-        webSocketClient.setReadTimeout(60000);
-        webSocketClient.enableAutomaticReconnection(5000);
-        webSocketClient.connect();
-    }
-
-    public void sendMessage(String message) {
-        webSocketClient.send(message);
     }
 }

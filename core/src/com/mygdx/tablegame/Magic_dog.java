@@ -5,7 +5,7 @@ public class Magic_dog extends Card{
         super(3);
         power_points=0;
         win_points=1;
-        cost=2;
+        cost=0;
     }
 
     @Override

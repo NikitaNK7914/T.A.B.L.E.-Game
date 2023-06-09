@@ -7,7 +7,7 @@ public class Protection_amulet extends Card{
         super(5);
         power_points=0;
         win_points=1;
-        cost=3;
+        cost=0;
     }
 
     @Override

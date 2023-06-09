@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public  class GameController extends Game {
 	MainMenuScreen menu;
 	static GameState state;
-
+	static final String log_tag="MyApp";
 	@Override
 	public void create () {
 		TextureStorage tx=new TextureStorage();
