@@ -53,13 +53,12 @@ import tech.gusavila92.websocketclient.WebSocketClient;
 
 public class GameScreen implements Screen {
     private Model table_model;
-    private  Model terrain_model;
+    private Model terrain_model;
     private ModelInstance table_instance;
     private ModelInstance terrain_instance;
     private ModelBatch modelBatch;
     private Environment environment;
     private static SpriteBatch spriteBatch;
-    private long Time;
     private Sprite black_fon;
     private Texture black = new Texture(Gdx.files.internal("black.png"));
     private Stage selection_stage;
@@ -74,6 +73,7 @@ public class GameScreen implements Screen {
     private static String[] player_UI_names = new String[4];
     private static boolean camera_type = false;
     private TextButton camera_button;
+
     public static String[] getPlayer_UI_names() {
         return player_UI_names;
     }
@@ -184,15 +184,14 @@ public class GameScreen implements Screen {
         for (int i = 0; i < Server.players_count; i++) {
             player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].getPower_points();
         }
-        Vector3 temp=new Vector3(Server.player_now.camera.position);
-        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 100, -70), 6000, new Vector3(0,60,0), "test");
+        Vector3 temp = new Vector3(Server.player_now.camera.position);
+        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 100, -70), 6000, new Vector3(0, 60, 0), "test");
     }
 
     @Override
     public void show() {
         Server.player_now.player_init();
         Server.player_now.getHand();
-        Time = TimeUtils.millis();
     }
 
     @Override

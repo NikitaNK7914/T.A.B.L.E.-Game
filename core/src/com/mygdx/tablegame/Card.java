@@ -268,7 +268,6 @@ public class Card extends Touchable {
             }
             case ("laying_out_card"): {
                 if (Server.turn_end_button_pressed) {
-                    Server.server_time = TimeUtils.millis();
                     for (Card card : Server.player_now.hand) {
                         CanTouch.renderable_2d.remove(card);
                         CanTouch.sprite_collisions.remove(card);

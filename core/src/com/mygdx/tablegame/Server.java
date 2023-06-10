@@ -8,20 +8,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Server {
-    static ArrayList<Card> main_deck = new ArrayList<>();
-    static Vector3 main_deck_pos = new Vector3(-2.5f, 30.5f, 0);
-    static ArrayList<Card> legend_deck = new ArrayList<>();
-    static Vector3 legend_deck_pos = new Vector3(2.5f, 30.5f, 0);
-    static ArrayList<Card> destroyed_deck = new ArrayList<>();
-    static ArrayList<Card> market_deck = new ArrayList<>();
-    static Vector3 market_deck_pos = new Vector3(-9.7f, 30, 8);
-    static Boolean turn_end_button_pressed = false;
-    static Player[] players;
-    static Player player_now;
-    static Player prev_player;
-    static int turns_lasts = 0;
-    static int players_count = 0;
-    static long server_time;
+    private static ArrayList<Card> main_deck = new ArrayList<>();
+    public static Vector3 main_deck_pos = new Vector3(-2.5f, 30.5f, 0);
+    private static ArrayList<Card> legend_deck = new ArrayList<>();
+    public static Vector3 legend_deck_pos = new Vector3(2.5f, 30.5f, 0);
+    private static ArrayList<Card> destroyed_deck = new ArrayList<>();
+    public static ArrayList<Card> market_deck = new ArrayList<>();
+    public static Vector3 market_deck_pos = new Vector3(-9.7f, 30, 8);
+    public static Boolean turn_end_button_pressed = false;
+    public static Player[] players;
+    public static Player player_now;
+    public static Player prev_player;
+    private static int turns_lasts = 0;
+    public static int players_count = 0;
 
     public static void server_init(ArrayList<String> names) {
         players = new Player[players_count];

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class ElementUI {
     public Sprite sprite;
-    public final int texture_id;
+    private final int texture_id;
 
     public ElementUI(int texture_id) {
         this.texture_id = texture_id;

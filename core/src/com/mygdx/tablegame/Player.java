@@ -21,7 +21,7 @@ public class Player {
     private Integer hand_size;
     private Integer armor = 0;
     public ElementUI[] armor_bar;
-    public ArrayList<Card> deck;
+    public ArrayList<Card> deck;//private
     public Vector3 deck_pos;
     public ArrayList<Card> hand;
     public ArrayList<Card> trash;
