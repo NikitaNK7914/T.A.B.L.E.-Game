@@ -6,5 +6,6 @@ public enum GameState {
     CHANGE_PLAYER,
     START,
     CREATING,
+    CREATING_ONLINE,
     END;
 }

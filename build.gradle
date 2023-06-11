@@ -87,6 +87,7 @@ project(":core") {
     dependencies {
         implementation 'tech.gusavila92:java-android-websocket-client:1.2.2'
         implementation fileTree(dir: 'libs', include: ['*.jar'])
+        implementation 'org.json:json:20200518'
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"

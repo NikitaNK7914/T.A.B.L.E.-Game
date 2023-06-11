@@ -59,6 +59,7 @@ public class GameScreen implements Screen {
     private ModelBatch modelBatch;
     private Environment environment;
     private static SpriteBatch spriteBatch;
+    Pair<Vector2, Float> animation_data;
     private Sprite black_fon;
     private Texture black = new Texture(Gdx.files.internal("black.png"));
     private Stage selection_stage;
@@ -73,16 +74,17 @@ public class GameScreen implements Screen {
     private static String[] player_UI_names = new String[4];
     private static boolean camera_type = false;
     private TextButton camera_button;
+    private Animation anim_data = new Animation();
+    private Matrix3 anim_matrix = new Matrix3();
+    private Quaternion quaternion = new Quaternion();
+    private Float XrotAng;
+    private Float YrotAng;
+    private Float ZrotAng;
 
     public static String[] getPlayer_UI_names() {
         return player_UI_names;
     }
 
-    private Animation anim_data = new Animation();
-    private Matrix3 anim_matrix = new Matrix3();
-    private Matrix4 matrix4 = new Matrix4();
-    private Quaternion quaternion = new Quaternion();
-    private CameraAnimation cameraAnimation;
 
     public GameScreen() {
         modelBatch = new ModelBatch();
@@ -184,8 +186,6 @@ public class GameScreen implements Screen {
         for (int i = 0; i < Server.players_count; i++) {
             player_UI_names[i] = Server.players[i].name + "`s power points" + Server.players[i].getPower_points();
         }
-        Vector3 temp = new Vector3(Server.player_now.camera.position);
-        cameraAnimation = new CameraAnimation(Server.player_now.camera.position, new Vector3(50, 100, -70), 6000, new Vector3(0, 60, 0), "test");
     }
 
     @Override
@@ -216,13 +216,12 @@ public class GameScreen implements Screen {
                                 anim_data.start_time = TimeUtils.millis();
                             }
                             if (anim_data.duration > TimeUtils.timeSinceMillis(anim_data.start_time)) {
-                                long start_time = anim_data.start_time;
                                 if (anim_data.start_rotation_angles != null) {
-                                    Float XrotAng = anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotX;
+                                    XrotAng = anim_data.start_rotation_angles.x + anim_data.delta_angleX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration) - anim_data.prevRotX;
                                     anim_data.prevRotX += XrotAng;
-                                    Float YrotAng = anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotY;
+                                    YrotAng = anim_data.start_rotation_angles.y + anim_data.delta_angleY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration) - anim_data.prevRotY;
                                     anim_data.prevRotY += YrotAng;
-                                    Float ZrotAng = anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration) - anim_data.prevRotZ;
+                                    ZrotAng = anim_data.start_rotation_angles.z + anim_data.delta_angleZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration) - anim_data.prevRotZ;
                                     anim_data.prevRotZ += ZrotAng;
                                     anim_matrix.set(new float[]{
                                             MathUtils.cosDeg(YrotAng) * MathUtils.cosDeg(ZrotAng),
@@ -238,7 +237,7 @@ public class GameScreen implements Screen {
                                     quaternion.setFromMatrix(anim_matrix);
                                     card.instance.transform.rotate(quaternion);
                                 }
-                                card.setCardPos(new Vector3(anim_data.startPos.x + anim_data.distanceX * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration), anim_data.startPos.y + anim_data.distanceY * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration), anim_data.startPos.z + anim_data.distanceZ * (TimeUtils.timeSinceMillis(start_time) / anim_data.duration)));
+                                card.setCardPos(new Vector3(anim_data.startPos.x + anim_data.distanceX * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.y + anim_data.distanceY * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration), anim_data.startPos.z + anim_data.distanceZ * (TimeUtils.timeSinceMillis(anim_data.start_time) / anim_data.duration)));
                             }
 
                             if (anim_data.duration <= TimeUtils.timeSinceMillis(anim_data.start_time)) {
@@ -255,18 +254,17 @@ public class GameScreen implements Screen {
                     CanTouch.need_to_delete3D.remove(0);
                 }
                 modelBatch.end();
-                if (cameraAnimation != null) {
-                    if (cameraAnimation.start_time == -1) {
-                        cameraAnimation.start_time = TimeUtils.millis();
+               /* if (cameraAnimation != null) {
+                    if (cameraAnimation.anim_data.start_time == -1) {
+                        cameraAnimation.anim_data.start_time = TimeUtils.millis();
                     }
                 }
-                /*
                 if (cameraAnimation != null) {
-                    if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
-                        //Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.start_time) / cameraAnimation.duration));
-                        float XZrotAngle= cameraAnimation.XZrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleXZ;
+                    if (cameraAnimation.duration > TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time)) {
+                        //Server.player_now.camera.position.set(cameraAnimation.startPos.x + cameraAnimation.distanceX * (TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time) / cameraAnimation.duration), cameraAnimation.startPos.y + cameraAnimation.distanceY * (TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time) / cameraAnimation.duration), cameraAnimation.startPos.z + cameraAnimation.distanceZ * (TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time) / cameraAnimation.duration));
+                        float XZrotAngle= cameraAnimation.XZrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleXZ;
                         cameraAnimation.prevRotAngleXZ+=XZrotAngle;
-                        float YrotAngle= cameraAnimation.YrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleY;
+                        float YrotAngle= cameraAnimation.YrotAngle*(TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time)/cameraAnimation.duration)-cameraAnimation.prevRotAngleY;
                         cameraAnimation.prevRotAngleY+=YrotAngle;
                         Server.player_now.camera.rotate(XZrotAngle,0,cameraAnimation.endPos.y,0);
                         Server.player_now.camera.rotate(cameraAnimation.tmp_look_at,YrotAngle);
@@ -274,7 +272,7 @@ public class GameScreen implements Screen {
                     }
                 }
                 if (cameraAnimation != null) {
-                    if (cameraAnimation.duration <= TimeUtils.timeSinceMillis(cameraAnimation.start_time)) {
+                    if (cameraAnimation.duration <= TimeUtils.timeSinceMillis(cameraAnimation.anim_data.start_time)) {
                         cameraAnimation = null;
                     }
 
@@ -282,7 +280,7 @@ public class GameScreen implements Screen {
                 spriteBatch.begin();
                 if (!CanTouch.renderable_2d.isEmpty()) {
                     for (Card card : CanTouch.renderable_2d) {
-                        Pair<Vector2, Float> animation_data;
+
                         if (card.animations2D.isEmpty()) {
                         } else {
                             if (card.animations2D.get(0).iterator().hasNext()) {
@@ -293,7 +291,6 @@ public class GameScreen implements Screen {
                                 CanTouch.need_to_delete2D.add(card);
                             }
                         }
-
                         card.sprite.draw(spriteBatch);
                     }
                 }

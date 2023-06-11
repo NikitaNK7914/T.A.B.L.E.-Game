@@ -24,19 +24,25 @@ import tech.gusavila92.websocketclient.WebSocketClient;
 
 public class MainMenuScreen implements Screen {
     private final GameController game;
-    private SpriteBatch spriteBatch=new SpriteBatch();
-    private BitmapFont font=new BitmapFont();
+    private SpriteBatch spriteBatch = new SpriteBatch();
+    private BitmapFont font = new BitmapFont();
     private Stage stage;
-    public static  ArrayList<String> names=new ArrayList<>();
+    public static ArrayList<String> names = new ArrayList<>();// имена игроков для начала игры
     private Stage players_create_stage;
+    private Stage session_create_stage;
     private Skin skin;
     private TextureAtlas atlas;
     private PerspectiveCamera camera;
-    private TextButton start_button;
+    private TextButton single_start_button;
     private TextButton rules_button;
     private TextButton settings_button;
     private TextButton add_player_button;
     private TextButton begin_game_button;
+    private TextButton online_start_button;
+    private TextButton create_session_button;
+    private TextButton join_session_button;
+    private TextButton begin_online_game_button;
+    private TextField enter_session_name;
     private TextField enter_players_name;
     private VerticalGroup verticalGroup;
 
@@ -44,51 +50,58 @@ public class MainMenuScreen implements Screen {
         verticalGroup = new VerticalGroup();
         font.getData().setScale(5);
         this.game = gam;
-        GameController.state=GameState.START;
+        GameController.state = GameState.START;
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
         skin = new Skin();
-        atlas = new TextureAtlas(Gdx.files.internal("text_button.pack"));
+        atlas = new TextureAtlas(Gdx.files.internal("test.atlas"));
         skin.addRegions(atlas);
-        skin.load(Gdx.files.internal("skin.json"));
-        start_button = new TextButton("Start Game", skin);
-        start_button.setSize(600, 300);
-        start_button.setColor(new Color(0.57f, 0.222222f, 0.362785f, 1));
-        start_button.getLabel().setFontScale(5);
-        start_button.addListener(new ClickListener() {
+        skin.load(Gdx.files.internal("test.json"));
+        single_start_button = new TextButton("Single Play", skin);
+        single_start_button.setSize(600, 300);
+        single_start_button.getLabel().setFontScale(5);
+        single_start_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                GameController.state=GameState.CREATING;
+                GameController.state = GameState.CREATING;
+            }
+        });
+        online_start_button = new TextButton("Online Game", skin);
+        online_start_button.setSize(600, 300);
+        online_start_button.getLabel().setFontScale(5);
+        online_start_button.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                GameController.state = GameState.CREATING_ONLINE;
             }
         });
         rules_button = new TextButton("Game Rules", skin);
         rules_button.setSize(600, 300);
-        rules_button.setColor(Color.CHARTREUSE);
         rules_button.getLabel().setFontScale(5);
         rules_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
             }
         });
         settings_button = new TextButton("Settings", skin);
-        settings_button.setColor(Color.CORAL);
         settings_button.setSize(600, 300);
         settings_button.getLabel().setFontScale(5);
         settings_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 names.add("biba");
                 names.add("boba");
-                names.add("hui s goryi");
-                Server.players_count+=3;
+                names.add("aboba");
+                names.add("zeliboba");
+                Server.players_count += 4;
                 Server.server_init(names);
                 game.setScreen(new GameScreen());
-                GameController.state=GameState.CHANGE_PLAYER;
+                GameController.state = GameState.CHANGE_PLAYER;
             }
         });
         verticalGroup.setSize(600, 500);
         verticalGroup.fill(1.5f);
         verticalGroup.wrap(true);
         verticalGroup.setPosition(Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2 - 250);
-        verticalGroup.addActor(start_button);
+        verticalGroup.addActor(single_start_button);
+        verticalGroup.addActor(online_start_button);
         verticalGroup.addActor(rules_button);
         verticalGroup.addActor(settings_button);
         players_create_stage = new Stage();
@@ -100,41 +113,72 @@ public class MainMenuScreen implements Screen {
         enter_players_name.getStyle().font.getData().setScale(4);
         enter_players_name.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-               enter_players_name.setText("");
+                enter_players_name.setText("");
             }
         });
         add_player_button.getLabel().setFontScale(5);
         add_player_button.setSize(600, 250);
         add_player_button.setPosition(Gdx.graphics.getWidth() * 0.67f, Gdx.graphics.getHeight() / 5);
-        add_player_button.setColor(Color.GOLD);
         add_player_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                if(enter_players_name.getText()!="" && Server.players_count<5){
+                if (enter_players_name.getText() != "" && Server.players_count < 5) {
                     Server.players_count++;
                     names.add(enter_players_name.getText());
                     enter_players_name.setText("");
-                    if(Server.players_count>1)begin_game_button.setVisible(true);
+                    if (Server.players_count > 1) begin_game_button.setVisible(true);
                 }
             }
         });
         begin_game_button.setSize(600, 250);
-        begin_game_button.setColor(Color.SCARLET);
         begin_game_button.setPosition(Gdx.graphics.getWidth() * 0.67f, Gdx.graphics.getHeight() / 5 + 250);
         begin_game_button.setVisible(false);
         begin_game_button.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 Server.server_init(names);
                 game.setScreen(new GameScreen());
-                GameController.state=GameState.CHANGE_PLAYER;
+                GameController.state = GameState.CHANGE_PLAYER;
             }
         });
         stage.addActor(verticalGroup);
         players_create_stage.addActor(enter_players_name);
         players_create_stage.addActor(begin_game_button);
         players_create_stage.addActor(add_player_button);
-        createWebSocketClient();
-        sendMessage("test conn");
-
+        session_create_stage = new Stage();
+        enter_session_name = new TextField("enter session name", skin);
+        enter_session_name.setSize(800, 150);
+        enter_session_name.setPosition(Gdx.graphics.getWidth() / 2f - enter_players_name.getWidth() * 3f, Gdx.graphics.getHeight() * 0.8f);
+        enter_session_name.getStyle().font.getData().setScale(4);
+        enter_session_name.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                //enter_players_name.setText("");
+            }
+        });
+        create_session_button = new TextButton("create session", skin);
+        create_session_button.setSize(600, 250);
+        create_session_button.setPosition(Gdx.graphics.getWidth() / 2.2f - create_session_button.getWidth() / 2, Gdx.graphics.getHeight() / 2 - create_session_button.getHeight() / 2);
+        create_session_button.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        join_session_button = new TextButton("join session", skin);
+        join_session_button.setSize(600, 250);
+        join_session_button.setPosition(Gdx.graphics.getWidth() / 2.2f - join_session_button.getWidth() / 2, Gdx.graphics.getHeight() / 2 - join_session_button.getHeight() * 1.5f);
+        join_session_button.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        begin_online_game_button = new TextButton("start game", skin);
+        begin_online_game_button.setSize(600, 250);
+        begin_game_button.setPosition(Gdx.graphics.getWidth() * 0.67f, Gdx.graphics.getHeight() / 6);
+        begin_game_button.setVisible(true);
+        begin_game_button.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        session_create_stage.addActor(begin_game_button);
+        session_create_stage.addActor(join_session_button);
+        session_create_stage.addActor(create_session_button);
+        session_create_stage.addActor(enter_session_name);
     }
 
     @Override
@@ -148,7 +192,7 @@ public class MainMenuScreen implements Screen {
             case START: {
                 Gdx.input.setInputProcessor(stage);
                 camera.update();
-                ScreenUtils.clear(1,1,1,1);
+                ScreenUtils.clear(1, 1, 1, 1);
                 stage.act();
                 stage.draw();
                 break;
@@ -160,8 +204,16 @@ public class MainMenuScreen implements Screen {
                 players_create_stage.act();
                 players_create_stage.draw();
                 spriteBatch.begin();
-                font.draw(spriteBatch,"Players  "+Server.players_count+"/4",add_player_button.getX()+50,add_player_button.getY()-50);
+                font.draw(spriteBatch, "Players  " + Server.players_count + "/4", add_player_button.getX() + 50, add_player_button.getY() - 50);
                 spriteBatch.end();
+                break;
+            }
+            case CREATING_ONLINE: {
+                Gdx.input.setInputProcessor(session_create_stage);
+                camera.update();
+                ScreenUtils.clear(1, 1, 1, 0.5f);
+                session_create_stage.act();
+                session_create_stage.draw();
                 break;
             }
         }
@@ -189,62 +241,5 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-
-    }
-    private WebSocketClient webSocketClient;
-
-
-    private void createWebSocketClient() {
-        URI uri;
-        try {
-            // Connect to local host
-            uri = new URI("ws://192.168.1.42:8001/");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        webSocketClient = new WebSocketClient(uri) {
-            @Override
-            public void onOpen() {
-                webSocketClient.send("{\"session\":id_session, \"request\":\"ADD\"}"); // REQUEST ADD {"session":id_session, "request":"ADD"}
-            }
-
-            @Override
-            public void onTextReceived(String s) {
-                // you actions when receive message
-            }
-
-            @Override
-            public void onBinaryReceived(byte[] data) {
-            }
-
-            @Override
-            public void onPingReceived(byte[] data) {
-            }
-
-            @Override
-            public void onPongReceived(byte[] data) {
-            }
-
-            @Override
-            public void onException(Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            @Override
-            public void onCloseReceived() {
-                webSocketClient.send("{\"session\":id_session, \"request\":\"DELETE\"}"); // REQUEST DELETE {"session":id_session, "request":"DELETE"}
-            }
-        };
-
-        webSocketClient.setConnectTimeout(10000);
-        webSocketClient.setReadTimeout(60000);
-        webSocketClient.enableAutomaticReconnection(5000);
-        webSocketClient.connect();
-    }
-
-    public void sendMessage(String message) {
-        webSocketClient.send(message);
     }
 }

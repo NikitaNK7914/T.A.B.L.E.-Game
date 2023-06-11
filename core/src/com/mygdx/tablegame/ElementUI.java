@@ -1,7 +1,7 @@
 package com.mygdx.tablegame;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-
+// класс, используемый для отображения различных элементов экранного интерфейса, использует систему текстур, как в классе карты
 public class ElementUI {
     public Sprite sprite;
     private final int texture_id;

@@ -20,6 +20,7 @@ public class Animation {
     public float prevRotZ = 0;
     public boolean is3D;
     public String id;
+    
 
     public Animation(Vector3 start, Vector3 end, float millis_time, String id) {
         is3D = true;

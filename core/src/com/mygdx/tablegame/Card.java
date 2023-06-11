@@ -1,32 +1,26 @@
 package com.mygdx.tablegame;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.TimeUtils;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class Card extends Touchable {
-    private final static Model card_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("card_model1.g3dj"));
+    final static Model card_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("Card_model1.g3dj"));
     public Vector3 card_pos = new Vector3(0, 0, 0);
     public ModelInstance instance;
-    protected Integer cost = 3;
+    protected Integer cost = 0;
     protected Integer power_points;
     protected Integer win_points;
     public boolean is3D;
@@ -43,6 +37,7 @@ public class Card extends Touchable {
     private Vector3 temp_on_table_pos;
     public boolean in_market = false;
     private int texture_id;
+    public  Vector3 rot_angles;
 
     public Card(int texture_id) {
         this.texture_id = texture_id;
@@ -60,6 +55,7 @@ public class Card extends Touchable {
         animations2D = new ArrayList<>();
         animations3D = new ArrayList<>();
         instance.calculateBoundingBox(box).mul(instance.transform);
+        rot_angles=new Vector3(0,0,0);
     }
 
     public float getMax_rotate_angel() {
@@ -171,7 +167,8 @@ public class Card extends Touchable {
 
     public void convertTo2D(Vector3 camera_pos) {
         if (!CanTouch.renderable_3d.contains(this)) CanTouch.renderable_3d.add(this);
-        animations3D.add(new Animation(update_pos(), camera_pos, 2000, new Vector3(0, 0, 0), new Vector3(90, 0, 0), "convert2D"));
+        animations3D.add(new Animation(update_pos(), camera_pos, 2000, new Vector3(0,0,0), new Vector3(90, 0, 0), "convert2D"));
+        rot_angles.set(rot_angles.x+90,rot_angles.y,rot_angles.z);
     }
 
 
@@ -303,5 +300,11 @@ public class Card extends Touchable {
         instance.calculateBoundingBox(box).mul(instance.transform);
         box.getCenter(card_pos);
         return card_pos;
+    }
+    public  void rotate_card(Vector3 axis,float angle){
+        instance.transform.rotate(axis,angle);
+        if(axis.x!=0) rot_angles.set(rot_angles.x+angle,rot_angles.y,rot_angles.z);
+        if(axis.y!=0) rot_angles.set(rot_angles.x,rot_angles.y+angle,rot_angles.z);
+        if(axis.z!=0) rot_angles.set(rot_angles.x,rot_angles.y,rot_angles.z+angle);
     }
 }

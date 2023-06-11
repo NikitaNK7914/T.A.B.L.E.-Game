@@ -97,7 +97,6 @@ public class MyCameraInputController extends GestureDetector {
     private final Vector3 tmpV1 = new Vector3();
     private final Vector3 tmpV2 = new Vector3();
 
-    ArrayList<CameraAnimation> animations=new ArrayList<>();
 
     protected static class CameraGestureListener extends GestureAdapter {
         public MyCameraInputController controller;
@@ -116,12 +115,14 @@ public class MyCameraInputController extends GestureDetector {
             for (Touchable touchable : CanTouch.sprite_collisions) {
                 if (touchable.getSpriteHitBox().contains(x, y)) {
                     touch3d = false;
-                    if (TimeUtils.timeSinceMillis(touchable.prevTouchTime) < 1000) {
+                    if (TimeUtils.timeSinceMillis(touchable.prevTouchTime) < 1000 && CanTouch.now_selected_card==touchable) {
                         touchable.sprite_doubleTouched();
                         touchable.updateTime();
+                        break;
                     } else {
                         touchable.sprite_touched();
                         touchable.updateTime();
+                        break;
                     }
                 }
 
@@ -181,9 +182,6 @@ public class MyCameraInputController extends GestureDetector {
             return false;
         }
     }
-
-    ;
-
     protected final CameraGestureListener gestureListener;
 
     protected MyCameraInputController(final CameraGestureListener gestureListener, final Camera camera) {
