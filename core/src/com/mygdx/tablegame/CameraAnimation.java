@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 public class CameraAnimation {
-    public long anim_data.anim_data.start_time;
+    public long start_time;
     public final Vector3 startPos;
     public final Vector3 endPos;
     public float duration;
@@ -23,7 +23,7 @@ public class CameraAnimation {
 
     public CameraAnimation(final Vector3 start, final Vector3 end, float millis_time, final Vector3 look_at_pos, String id) {
         is3D = true;
-        anim_data.start_time = -1;
+        start_time = -1;
         startPos = start;
         endPos = end;
         camera_pos = Server.player_now.camera.position;
