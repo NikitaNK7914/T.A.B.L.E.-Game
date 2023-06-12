@@ -15,8 +15,8 @@ import com.mygdx.tablegame.game_logic.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
-public class Server {
+//класс сервера из одиночной игры,немного доработанный для взаимодействия с ServerRequestHandler, пока не используется в игре
+public class OnlineServer {/*
     public static String SessionID;
     public static int this_player_id;
     private static ArrayList<Card> main_deck = new ArrayList<>();
@@ -357,5 +357,5 @@ public class Server {
                     CanTouch.sprite_collisions.add(card);
             }
         }
-    }
+    }*/
 }
