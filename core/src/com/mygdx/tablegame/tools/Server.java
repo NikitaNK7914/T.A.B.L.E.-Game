@@ -16,7 +16,7 @@ import com.mygdx.tablegame.game_logic.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 //класс сервера из одиночной игры,немного доработанный для взаимодействия с ServerRequestHandler, пока не используется в игре
-public class OnlineServer {/*
+public class Server {/*
     public static String SessionID;
     public static int this_player_id;
     private static ArrayList<Card> main_deck = new ArrayList<>();
