@@ -17,6 +17,7 @@ import com.mygdx.tablegame.game_logic.GameController;
 import com.mygdx.tablegame.game_logic.GameScreen;
 import com.mygdx.tablegame.game_logic.GameState;
 import com.mygdx.tablegame.game_logic.Touchable;
+
 //класс из стандартного пакета LibGDX, внесены изменения в методы GestureListener для реализации RayCast
 public class MyCameraInputController extends GestureDetector {
     /**
@@ -115,13 +116,18 @@ public class MyCameraInputController extends GestureDetector {
         @Override
         public boolean tap(float x, float y, int count, int button) {
             //обнаружение касаний 2д и 3д карт
-            boolean touch3d = true;
-            if(GameScreen.card_looking){GameScreen.card_looking=false;GameController.state=GameState.RUN;}
+            boolean touch3d = true;//изначально проверяется не коснулся ли игрок спрайта и не нужно ли прекратить просмотр карты, т.к. это легче вычислить для устройства
+            if (GameScreen.card_looking) {
+                GameScreen.card_looking = false;
+                GameController.state = GameState.RUN;
+                CanTouch.now_looking_card = null;
+            }
             y = Gdx.graphics.getHeight() - y;
             for (Touchable touchable : CanTouch.sprite_collisions) {
                 if (touchable.getSpriteHitBox().contains(x, y)) {
                     touch3d = false;
-                    if (TimeUtils.timeSinceMillis(touchable.prevTouchTime) < 1000 && CanTouch.now_selected_card==touchable) {
+                    //если прошло менее одной секунды с касания карты(написать в правилах)
+                    if (TimeUtils.timeSinceMillis(touchable.prevTouchTime) < 1000 && CanTouch.now_selected_card == touchable) {
                         touchable.sprite_doubleTouched();
                         touchable.updateTime();
                         break;
@@ -162,21 +168,21 @@ public class MyCameraInputController extends GestureDetector {
         @Override
         public boolean longPress(float x, float y) {
             //обнаружение долгого касания 3д карт, для приближения
-                Ray ray = controller.camera.getPickRay(x, y);
-                Vector3 tPos = new Vector3();
-                int touchInd = -1;
-                float minDistance = 10000;
-                for (Touchable touchable : CanTouch.collisions) {
-                    if (Intersector.intersectRayBounds(ray, touchable.getHitBox(), tPos))
-                        if (Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z) < minDistance) {
-                            touchInd = CanTouch.collisions.indexOf(touchable);
-                            minDistance = Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z);
-                        }
-                }
-                if (touchInd != -1) {
-                    CanTouch.now_looking_card= (Card) CanTouch.collisions.get(touchInd);
-                    GameController.state= GameState.CARD_LOOKING;
-                }
+            Ray ray = controller.camera.getPickRay(x, y);
+            Vector3 tPos = new Vector3();
+            int touchInd = -1;
+            float minDistance = 10000;
+            for (Touchable touchable : CanTouch.collisions) {
+                if (Intersector.intersectRayBounds(ray, touchable.getHitBox(), tPos))
+                    if (Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z) < minDistance) {
+                        touchInd = CanTouch.collisions.indexOf(touchable);
+                        minDistance = Math.abs(tPos.x - ray.origin.x) + Math.abs(tPos.y - ray.origin.y) + Math.abs(tPos.z - ray.origin.z);
+                    }
+            }
+            if (touchInd != -1) {
+                CanTouch.now_looking_card = (Card) CanTouch.collisions.get(touchInd);
+                GameController.state = GameState.CARD_LOOKING;
+            }
             return true;
         }
 
@@ -204,6 +210,7 @@ public class MyCameraInputController extends GestureDetector {
             return false;
         }
     }
+
     public final CameraGestureListener gestureListener;
 
     public MyCameraInputController(final CameraGestureListener gestureListener, final Camera camera) {
@@ -274,9 +281,9 @@ public class MyCameraInputController extends GestureDetector {
 
     public boolean process(float deltaX, float deltaY, int button) {
         if (button == rotateButton) {
-                tmpV1.set(camera.direction).crs(camera.up).y = 0f;
-                camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
-                camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
+            tmpV1.set(camera.direction).crs(camera.up).y = 0f;
+            camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
+            camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
         } else if (button == translateButton) {
             camera.translate(tmpV1.set(camera.direction).crs(camera.up).nor().scl(-deltaX * translateUnits));
             camera.translate(tmpV2.set(camera.up).scl(-deltaY * translateUnits));

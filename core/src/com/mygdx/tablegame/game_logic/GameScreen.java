@@ -80,12 +80,12 @@ public class GameScreen implements Screen {
         terrain_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("terrain.g3dj"));
         table_model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("Table.g3dj"));
         terrain_instance = new ModelInstance(terrain_model);
-        terrain_instance.transform.setToScaling(8, 8, 8);
+        terrain_instance.transform.setToScaling(8, 8, 8);//подобрано экспериментально(т.к. нет редактора карт), а делать стол и террейн экземплярами одной модели не представлялось возможным из-за текстурирования
         terrain_instance.transform.setTranslation(0, 227.5f, -175);
         table_instance = new ModelInstance(table_model);
         table_instance.transform.setToScaling(50, 50, 50);
         environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));//подобрано экспериментально
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
         Server.player_now.camera.update();
         spriteBatch = new SpriteBatch();
@@ -93,8 +93,8 @@ public class GameScreen implements Screen {
         black_fon.setCenter(black.getWidth() / 2, black.getHeight() / 2);
         black_fon.setOrigin(black_fon.getWidth() / 2, black_fon.getHeight() / 2);
         black_fon.setTexture(black);
-        black_fon.setScale(20);
-        black_fon.setAlpha(0.75f);
+        black_fon.setScale(20);//для закрытия вссего экрана
+        black_fon.setAlpha(0.75f);// установка прозрачности
         font = new BitmapFont();
         selection_stage = new Stage();
         Skin skin = new Skin();
@@ -103,6 +103,7 @@ public class GameScreen implements Screen {
         skin.load(Gdx.files.internal("skin.json"));
         selection_buttons = new TextButton[5];
         for (int i = 0; i < 5; i++) {
+            //по идее более 3 кнопок не понадобится, но на будующее пусть будет 4
             selection_buttons[i] = new TextButton(" ", skin);
             selection_buttons[i].setSize(Gdx.graphics.getHeight() / 5, Gdx.graphics.getHeight() / 5);
             selection_buttons[i].setPosition(0, 0);
@@ -110,6 +111,7 @@ public class GameScreen implements Screen {
             selection_buttons[i].setVisible(false);
             selection_stage.addActor(selection_buttons[i]);
         }
+        // размещения моделей колод игроков
         for (int i = 0; i < Server.players_count; i++) {
             Deck deck = new Deck();
             if (Server.players_count != 2 && i % 2 == 1) {
@@ -130,6 +132,7 @@ public class GameScreen implements Screen {
         Deck deck1 = new Deck();
         deck1.setCardPos(Server.legend_deck_pos);
         decks.add(deck1);
+        //сцена для смены игроков
         changing_stage = new Stage();
         change_button = new TextButton(" ", skin);
         change_button.setSize(500, 250);
@@ -146,6 +149,7 @@ public class GameScreen implements Screen {
             }
         });
         changing_stage.addActor(change_button);
+        //кнопка конца хода
         end_turn_button = new TextButton("End Turn", skin);
         end_turn_button.getLabel().setFontScale(4);
         end_turn_button.setSize(550, 200);
@@ -232,7 +236,7 @@ public class GameScreen implements Screen {
                     }
                 }
                 for (int i = 0; i < CanTouch.need_to_delete3D.size(); ) {
-                    //удаление закончившийся анимации
+                    //удаление закончившийся анимации(нужно для вызова функции конца анимации , после полной реализации анимаций, зависящих от времени изменить)
                     CanTouch.need_to_delete3D.get(0).animation3Dend(CanTouch.need_to_delete3D.get(0).animations3D.get(0).id);
                     CanTouch.need_to_delete3D.get(0).animations3D.remove(0);
                     CanTouch.need_to_delete3D.remove(0);
@@ -281,7 +285,7 @@ public class GameScreen implements Screen {
                     }
                 }
                 for (int i = 0; i < CanTouch.need_to_delete2D.size(); ) {
-                    //удаление закончившихся анимаций
+                    //удаление закончившихся анимаций(нужно для вызова функции конца анимации , после полной реализации анимаций, зависящих от времени изменить)
                     CanTouch.need_to_delete2D.get(0).animation2Dend(CanTouch.need_to_delete2D.get(0).animations2D.get(0).id);
                     CanTouch.need_to_delete2D.get(0).animations2D.remove(0);
                     CanTouch.need_to_delete2D.remove(0);
@@ -437,6 +441,7 @@ public class GameScreen implements Screen {
 
     public static void attack_target_selection(final ArrayList<Player> targets, final int damage) {
         //выбор цели атаки
+        //#TODO переделать функцию с использованием элементов интерфеса ElementUI,а не сцены и кнопок
         GameController.state = GameState.SELECT;
         for (int i = 0; i < targets.size(); i++) {
             if (targets.size() == 2) {

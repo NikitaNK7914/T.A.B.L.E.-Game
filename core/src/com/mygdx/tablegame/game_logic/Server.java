@@ -18,7 +18,7 @@ import com.mygdx.tablegame.tools.Animation;
 import java.util.ArrayList;
 import java.util.Collections;
 
-// класс для постороения взаимодействий между другими классами и логики игровых ходов, несмотря на название, пока не имеет отношения к сетевой игре
+// класс для построения взаимодействий между другими классами и логики игровых ходов, несмотря на название, пока не имеет отношения к сетевой игре
 public class Server {
     private static ArrayList<Card> main_deck = new ArrayList<>(); // основная колода, откуда берутся карты для пополнения магазина
     public static Vector3 main_deck_pos = new Vector3(-2.5f, 30.5f, 0);
@@ -30,8 +30,8 @@ public class Server {
     public static Boolean turn_end_button_pressed = false;// завершен ли ход(лучше придумать более красивое решение)
     public static Player[] players;// игроки
     public static Player player_now;// игрок, который сейчас ходит
-    public static Player prev_player;// предыущий игрок
-    private static int turns_lasts = 0;// число прошедщих со старта ходов
+    public static Player prev_player;
+    private static int turns_lasts = 0;// число прошедших со старта ходов
     public static int players_count = 0;// количество игроков
     public static Vector3 actual_card_rotation = new Vector3(0, 0, 0);// для доворота новых карт, дополняющих магазин
 
@@ -106,8 +106,14 @@ public class Server {
                 card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, players[i].getCard_rot_modifier());
                 players[i].deck.add(card);
             }
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 2; j++) {
                 Pshik card = new Pshik();
+                card.setCardPos(players[i].deck_pos);
+                card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, players[i].getCard_rot_modifier());
+                players[i].deck.add(card);
+            }
+            for (int j = 0; j < 2; j++) {
+                Fire_ball card = new Fire_ball();
                 card.setCardPos(players[i].deck_pos);
                 card.instance.transform.rotate(0, card.getHitBox().getCenterY(), 0, players[i].getCard_rot_modifier());
                 players[i].deck.add(card);
@@ -151,7 +157,7 @@ public class Server {
         Collections.shuffle(main_deck);
     }
 
-    public static void attack(Player target_player, int damage) {//атака определенного игрока, в будующем следует добавить обработку доп.эффектов
+    public static void attack(Player target_player, int damage) {//атака определенного игрока, в будущем следует добавить обработку доп.эффектов
         target_player.refresh_health(damage);
     }
 
@@ -210,6 +216,7 @@ public class Server {
         for (int i = 0; i < 5 - y; i++) {
             // получение отсутствующих в магазине карт
             Card card = Server.get_card(-1, "main_deck");
+            card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,actual_card_rotation.y);
             CanTouch.renderable_3d.add(card);
             market_deck.add(card);
         }
@@ -220,37 +227,46 @@ public class Server {
                 if (players_count == 2 && player_now.player_number == 0) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,-180);
                 } else {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 180, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,-180);
                 }
                 if (players_count == 3 && player_now.player_number == 0) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,0);
                 }
                 if (players_count == 3 && player_now.player_number == 1) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, -90, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
                 if (players_count == 3 && player_now.player_number == 2) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, -180, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
                 if (players_count == 4 && player_now.player_number == 0) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 90, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
                 if (players_count == 4 && player_now.player_number == 1) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 180, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
                 if (players_count == 4 && player_now.player_number == 2) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 270, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
                 if (players_count == 4 && player_now.player_number == 3) {
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
+                    card.instance.transform.rotate(0,card.getHitBox().getCenterY(),0,90);
                 }
             }
             // обновление позиций карт
@@ -337,7 +353,7 @@ public class Server {
         }
         turns_lasts++;
         if (main_deck.isEmpty() && market_deck.size() < 5) {
-            GameController.state = GameState.END;//конец игры при опустении основной колоды
+            GameController.state = GameState.END;//конец игры при опустошении основной колоды
         }
     }
 

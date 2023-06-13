@@ -3,6 +3,7 @@ package com.mygdx.tablegame.tools;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.tablegame.game_logic.Server;
+
 // класс анимаций камеры, временно не используется, находится в процессе доработки
 public class CameraAnimation {
     public long start_time;

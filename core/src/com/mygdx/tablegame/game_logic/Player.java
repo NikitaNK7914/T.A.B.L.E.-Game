@@ -39,7 +39,7 @@ public class Player {
 
 
     public Player(Vector3 pos, int num) {
-        Gdx.app.setLogLevel(Application.LOG_ERROR);// для логгирования ошибок
+        Gdx.app.setLogLevel(Application.LOG_ERROR);// для логирования ошибок
         player_number = num;
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         // дальность обзора камеры
@@ -202,7 +202,8 @@ public class Player {
         //вычисления при наличии брони
         if (delta < 0) {
             if (armor > 0 && delta <= -armor) {
-                for (int i = armor; i < armor; i++) {
+                //вся
+                for (int i = 0; i < armor; i++) {
                     armor_bar[i].change_texture(-1);
                 }
                 delta += armor;

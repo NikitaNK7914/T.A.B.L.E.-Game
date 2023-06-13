@@ -13,7 +13,7 @@ public class Animation {
     public float distanceZ;
     public Vector3 start_rotation_angles;//начальные углы поворота(углы эйлера по каждой из осей)
     public Vector3 end_rotation_angles;//конечные углы поворота(углы эйлера по каждой из осей)
-    //угловое смещение по каждй из осей
+    //угловое смещение по каждой из осей
     public float delta_angleX;
     public float delta_angleY;
     public float delta_angleZ;

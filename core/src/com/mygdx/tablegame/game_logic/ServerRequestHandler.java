@@ -1,22 +1,26 @@
 package com.mygdx.tablegame.game_logic;
 
+import com.mygdx.tablegame.cards.Card;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import tech.gusavila92.websocketclient.WebSocketClient;
-//класс для сетевой игры, пока вразработки и нигде в игре не используется
+
 public class ServerRequestHandler {
     private WebSocketClient webSocketClient;
+
     private void createWebSocketClient() {
         URI uri;
         try {
-            // Connect to local host
+            // Create connection
             uri = new URI("ws://192.0.0.1:8001/");
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -26,40 +30,58 @@ public class ServerRequestHandler {
         webSocketClient = new WebSocketClient(uri) {
             @Override
             public void onOpen() {
-               /* webSocketClient.send("{" +
-                        "\"session\":" + generate_id_session() + ", " +
+                // Create connection to SessionID
+                webSocketClient.send("{" +
+                        "\"session\":\"" + ServerOnline.SessionID + "\", " +
                         "\"request\":\"CONNECT\"," +
                         "\"id\": -1" +
                         "}"
-                );*/
+                );
             }
 
             @Override
             public void onTextReceived(String s) {
                 try {
                     JSONResponse jsonResponse = new JSONResponse(new JSONObject(s));
-                    if (jsonResponse.type_request.equals("CONNECT")) {
-                        if (jsonResponse.mess == 0) {
-                            // not connected message
-                        } else {
-                            // set global id player - mess value
-                        }
-                    } else if (jsonResponse.type_request.equals("ATTACK")) {
-                        // check armor card and send ARMOR request
-                    } else if (jsonResponse.type_request.equals("POST")) {
-                        // update decks and stats
-                    } else if (jsonResponse.type_request.equals("ARMOR")) {
-                        // logic turn
-                    } else if (jsonResponse.type_request.equals("START")) {
-                        // start session
+                    switch (jsonResponse.type_request) {
+                        case "CONNECT":
+                            if (jsonResponse.mess == 0) {
+                                // not connected message
+                                /*
+--------------------------------------PASTE CODE----------------------------------------------------
+                                 */
+                                // close connection
+                                webSocketClient.close();
+                            } else {
+                                // set global id player - mess value
+                                ServerOnline.this_player_id = jsonResponse.mess;
+                            }
+                            break;
+                        case "ATTACK":
+                            // check armor card and send ARMOR request
+                                /*
+--------------------------------------PASTE CODE----------------------------------------------------
+                                 */
+                            break;
+                        case "POST":
+                            // update decks and stats
+                                /*
+--------------------------------------PASTE CODE----------------------------------------------------
+                                 */
+                            break;
+                        case "ARMOR":
+                            // logic turn
+                                /*
+--------------------------------------PASTE CODE----------------------------------------------------
+                                 */
+                            break;
+                        case "START":
+                            // start session
+                                /*
+--------------------------------------PASTE CODE----------------------------------------------------
+                                 */
+                            break;
                     }
-                    /*
-                    if CONNECT => connect (mess - id player)/not connect
-                    if ATTACK => CHECK and SEND ARMOR
-                    if POST update
-                    if ARMOR => logic
-                    if START => start session
-                     */
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -80,17 +102,18 @@ public class ServerRequestHandler {
 
             @Override
             public void onException(Exception e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
 
             @Override
             public void onCloseReceived() {
-                /*webSocketClient.send("{" +
-                        "\"session\":" + get_id_session() + ", " +
+                // session close handling
+                webSocketClient.send("{" +
+                        "\"session\":\"" + ServerOnline.SessionID + "\", " +
                         "\"request\":\"DISCONNECT\"," +
-                        "\"id\": -1" +
+                        "\"id\": " + ServerOnline.this_player_id +
                         "}"
-                );*/
+                );
             }
         };
 
@@ -100,74 +123,111 @@ public class ServerRequestHandler {
         webSocketClient.connect();
     }
 
-    /*public void sendPostRequest(T deck_1, T deck_2, ...,T state_player_1, T state_player_2, ...) {
-        // PSEUDOCODE
+    private String deckToString(ArrayList<Card> deck, String name) {
+        // format deck to JSON string
+        String str_deck = "";
+        str_deck += "\"" + name + "\":[";
+        StringBuilder str_deckBuilder = new StringBuilder(str_deck);
+        for (Card card : deck) {
+            str_deckBuilder.append(Card.ID).append(",");
+        }
+        str_deck = str_deckBuilder.toString();
+        str_deck += "],";
+        return str_deck;
+    }
+
+    private String stateToString(Player player, String name) {
+        // format player state to JSON string
+        String str_state = "";
+        str_state += "\"" + name + "\":{";
+        str_state += "\"health\":" + player.getHealth() + ",";
+        str_state += "\"power_points\":" + player.getPower_points() + ",";
+        str_state += "},";
+        return str_state;
+    }
+
+    public void sendPostRequest(ArrayList<Card> main_deck,
+                                ArrayList<Card> legend_deck,
+                                ArrayList<Card> destroyed_deck,
+                                ArrayList<Card> market_deck,
+                                Player player_1,
+                                Player player_2,
+                                Player player_3,
+                                Player player_4) {
         String decks = "";
-        for (deck:
-             all_decks) {
-            decks += "\"NAME_DECK\":[";
-            for (card:
-                 deck) {
-                decks += Integer.to_String(id_card) + ",";
-            }
-            decks += "],";
-        }
         String state = "";
-        // state - health and power
-        for (state:
-             all_states) {
-            state += "\"ID_USER\":{";
-            state += "\"health\":" + Integer.to_String(state.health) + ",";
-            state += "\"power\":" + Integer.to_String(state.power);
-            decks += "],";
-        }
+        decks += deckToString(player_1.deck, "deck_player_1");
+        decks += deckToString(player_1.hand, "hand_player_1");
+        decks += deckToString(player_1.trash, "trash_player_1");
+        decks += deckToString(player_1.on_table_cards, "on_table_player_1");
+        state += stateToString(player_1, "0");
+        decks += deckToString(player_2.deck, "deck_player_2");
+        decks += deckToString(player_2.hand, "hand_player_2");
+        decks += deckToString(player_2.trash, "trash_player_2");
+        decks += deckToString(player_2.on_table_cards, "on_table_player_2");
+        state += stateToString(player_2, "1");
+        decks += deckToString(player_3.deck, "deck_player_3");
+        decks += deckToString(player_3.hand, "hand_player_3");
+        decks += deckToString(player_3.trash, "trash_player_3");
+        decks += deckToString(player_3.on_table_cards, "on_table_player_3");
+        state += stateToString(player_3, "2");
+        decks += deckToString(player_4.deck, "deck_player_4");
+        decks += deckToString(player_4.hand, "hand_player_4");
+        decks += deckToString(player_4.trash, "trash_player_4");
+        decks += deckToString(player_4.on_table_cards, "on_table_player_4");
+        state += stateToString(player_4, "3");
+        decks += deckToString(main_deck, "main_deck");
+        decks += deckToString(legend_deck, "legend_deck");
+        decks += deckToString(destroyed_deck, "destroyed_deck");
+        decks += deckToString(market_deck, "market_deck");
         webSocketClient.send("{" +
-                "\"session\":" + get_id_session() + ", " +
+                "\"session\":\"" + ServerOnline.SessionID + "\", " +
                 "\"request\":\"POST\"," +
-                "\"id\"" + Integer.toString(get_player_id()) + "\"," +
+                "\"id\": " + ServerOnline.this_player_id +
                 "\"data\":" +
-                "\"move\":" + whose_turn() + "," +
+                "\"move\":" + Server.player_now.id + "," +
                 "\"decks\":{" + decks + "}," +
                 "\"statistic\":{" + state + "}," +
                 "}");
-    }*/
+    }
 
     public void sendStartRequest() {
-        /*webSocketClient.send("{" +
-                "\"session\":" + get_id_session() + ", " +
+        webSocketClient.send("{" +
+                "\"session\":\"" + ServerOnline.SessionID + "\", " +
                 "\"request\":\"START\"," +
-                "\"id\"" + Integer.toString(get_player_id()) + "\"," +
+                "\"id\": " + ServerOnline.this_player_id +
                 "}"
-        );*/
+        );
     }
 
-    public void sendAttackRequest(int card, int player_number) {
-        /*webSocketClient.send("{" +
-                "\"session\":" + get_id_session() + ", " +
+    public void sendAttackRequest(int card_id, int player_number) {
+        webSocketClient.send("{" +
+                "\"session\":" + ServerOnline.SessionID + "\", " +
                 "\"request\":\"ATTACK\"," +
-                "\"id\"" + Integer.toString(get_player_id()) + "\"," +
-                "\"card\":\"" + Integer.toString(card) + "\"," +
-                "\"id_target\":\"" + Integer.toString(player_number) + "\"," +
-                "\"id_player\":\"" + Integer.toString(get_player_id()) + "\"" +
+                "\"id\": " + ServerOnline.this_player_id +
+                "\"card\":\"" + card_id + "\"," +
+                "\"id_target\":" + player_number + "," +
+                "\"id_player\":" + ServerOnline.this_player_id +
                 "}"
-        );*/
+        );
     }
 
-    public void sendArmorRequest(int card, int player_number) {
-        /*webSocketClient.send("{" +
-                "\"session\":" + get_id_session() + ", " +
+    public void sendArmorRequest(int card_id, int player_number) {
+        webSocketClient.send("{" +
+                "\"session\":" + ServerOnline.SessionID + "\", " +
                 "\"request\":\"ARMOR\"," +
-                "\"id\"" + Integer.toString(get_player_id()) + "\"," +
-                "\"card\":\"" + Integer.toString(card) + "\"," +
-                "\"id_target\":\"" + Integer.toString(player_number) + "\"," +
-                "\"id_player\":\"" + Integer.toString(get_player_id()) + "\"" +
+                "\"id\": " + ServerOnline.this_player_id +
+                "\"card\":\"" + card_id + "\"," +
+                "\"id_target\":" + player_number + "," +
+                "\"id_player\":" + ServerOnline.this_player_id +
                 "}"
-        );*/
+        );
     }
-    private class JSONAttack {
+
+    private static class JSONAttack {
         int card, id_target, id_player_attacker;
 
-        JSONAttack(JSONObject jsonObject){
+        JSONAttack(JSONObject jsonObject) {
             try {
                 this.card = jsonObject.getInt("card");
                 this.id_target = jsonObject.getInt("id_target");
@@ -178,7 +238,7 @@ public class ServerRequestHandler {
         }
     }
 
-    private  class JSONDeck {
+    private static class JSONDeck {
         public Vector<Integer> deck;
 
 
@@ -194,7 +254,7 @@ public class ServerRequestHandler {
         }
     }
 
-    private  class JSONPost {
+    private static class JSONPost {
         int move;
         TreeMap<String, JSONDeck> decks = new TreeMap<>();
         TreeMap<String, JSONState> states = new TreeMap<>();
@@ -223,7 +283,7 @@ public class ServerRequestHandler {
         }
     }
 
-    private class JSONResponse {
+    private static class JSONResponse {
         long session;
         String type_request;
 
@@ -257,7 +317,8 @@ public class ServerRequestHandler {
             }
         }
     }
-    private class JSONState {
+
+    private static class JSONState {
         public int health, power;
 
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 
 import java.util.ArrayList;
 //класс, используемый для хранения текстур и их быстрой смены
+//#TODO заменить на Map с статическим массивом строк(названий текстур)
 public class TextureStorage {
     public static TextureAttribute[][] textures3d = new TextureAttribute[16][2];
     public static Texture[][] textures2d = new Texture[16][2];

@@ -38,7 +38,7 @@ public class Card extends Touchable {
     private static int lay_down_cards = 0;// костыль, для отслеживания количества взятых карт при взятии руки, помле устранения зависимости анимаций от каадров убрать
     public ArrayList<Generator> animations2D;// анимации 2д представления
     public ArrayList<Animation> animations3D;// анимации 3д представления
-    private float max_rotate_angel = 8;// поворот карт в руке
+    private float max_rotate_angel = 8;// поворот карт в руке(максимальный), знвчение подобранно в результате тестов
     private float inHandX;//позиция карты в руке
     private float inHandY;
     private float inHand_rotation;//поворот карты в руке
@@ -58,8 +58,8 @@ public class Card extends Touchable {
         instance = new ModelInstance(card_model);
         instance.transform.setTranslation(card_pos);//перемещение карты
         box = new BoundingBox();
-        instance.transform.setToScaling(8.5f, 8.5f, 8.5f);//увеличение карты, лучше заменить фактическим увеличением исходной модели
-        instance.transform.rotate(1, 0, 0, 180);//ПОВЕРНИ ЕЕ В БЛЕНДЕРЕ НАКОНЕЦ
+        instance.transform.setToScaling(8.5f, 8.5f, 8.5f);//увеличение карты, #TODO заменить фактическим увеличением и поворотом исходной модели
+        instance.transform.rotate(1, 0, 0, 180);
         change_texture(3);
         animations2D = new ArrayList<>();
         animations3D = new ArrayList<>();
@@ -120,7 +120,7 @@ public class Card extends Touchable {
                 Pair<Vector2, Float> answ = new Pair<>(nowPos, rotatePframe);
                 for (int i = 1; i <= frames; i++) {
                     answ.first.set(startPos.x + distanceXpFrame * i * directionX, startPos.y + distanceYpFrame * i * directionY);
-                    yield (answ);
+                    yield (answ);//каждый раз при повторном вызове функция вызывается с этого места
                 }
             }
         };
@@ -158,8 +158,9 @@ public class Card extends Touchable {
     }
 
     public void doubleTouched() {
-        //покупка карты
+
         if (Server.market_deck.contains(this) && Server.player_now.getPower_points() >= cost) {
+            //покупка карты
             Server.player_now.setPower_points(Server.player_now.getPower_points() - cost);
             GameScreen.getPlayer_UI_names()[Server.player_now.player_number] = Server.player_now.name + "`s power points  : " + Server.player_now.getPower_points();
             animations3D.add(new Animation(update_pos(), Server.player_now.trash_pos, 2000, "market_to_trash"));
@@ -171,7 +172,7 @@ public class Card extends Touchable {
     }
 
     public void sprite_doubleTouched() {
-        //разыгрывание карты
+        //разыгрывание карты(начало анимации
         convertTo3D(Server.player_now.camera.position, new Vector3(Server.player_now.played_card_pos.x + MathUtils.random(-1.2f, 1.2f), Server.player_now.played_card_pos.y, Server.player_now.played_card_pos.z + MathUtils.random(-1.2f, 1.2f)));
     }
 

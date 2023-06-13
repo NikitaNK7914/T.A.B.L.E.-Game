@@ -1,4 +1,4 @@
-package com.mygdx.tablegame.tools;
+package com.mygdx.tablegame.game_logic;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -8,15 +8,12 @@ import com.mygdx.tablegame.cards.Magic_dog;
 import com.mygdx.tablegame.cards.Protection_amulet;
 import com.mygdx.tablegame.cards.Pshik;
 import com.mygdx.tablegame.cards.Znak;
-import com.mygdx.tablegame.game_logic.CanTouch;
-import com.mygdx.tablegame.game_logic.GameController;
-import com.mygdx.tablegame.game_logic.GameState;
-import com.mygdx.tablegame.game_logic.Player;
+import com.mygdx.tablegame.tools.Animation;
 
 import java.util.ArrayList;
 import java.util.Collections;
 //класс сервера из одиночной игры,немного доработанный для взаимодействия с ServerRequestHandler, пока не используется в игре
-public class Server {/*
+public class ServerOnline {
     public static String SessionID;
     public static int this_player_id;
     private static ArrayList<Card> main_deck = new ArrayList<>();
@@ -191,9 +188,8 @@ public class Server {/*
 
         int y = market_deck.size();
         for (int i = 0; i < 5 - y; i++) {
-            Card card = Server.get_card(-1, "main_deck");
+            Card card = ServerOnline.get_card(-1, "main_deck");
             CanTouch.renderable_3d.add(card);
-            card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), actual_card_rotation.y);
             System.out.println(actual_card_rotation);
             market_deck.add(card);
         }
@@ -201,54 +197,45 @@ public class Server {/*
             Card card = market_deck.get(i);
             if (turns_lasts != 0) {
                 if (players_count == 2 && player_now.player_number == 0) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), -180);
                     card.rot_angles.set(card.rot_angles.x, (card.rot_angles.y + 180) % 360, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
                 } else {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), -180);
                     card.rot_angles.set(card.rot_angles.x, (card.rot_angles.y + 180) % 360, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 180, actual_card_rotation.z);
                 }
                 if (players_count == 3 && player_now.player_number == 0) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 0);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y - 0, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
                 }
                 if (players_count == 3 && player_now.player_number == 1) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 90, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, -90, actual_card_rotation.z);
                 }
                 if (players_count == 3 && player_now.player_number == 2) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 90, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, -180, actual_card_rotation.z);
                 }
                 if (players_count == 4 && player_now.player_number == 0) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 180, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 90, actual_card_rotation.z);
                 }
                 if (players_count == 4 && player_now.player_number == 1) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 180, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 180, actual_card_rotation.z);
                 }
                 if (players_count == 4 && player_now.player_number == 2) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 270, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 270, actual_card_rotation.z);
                 }
                 if (players_count == 4 && player_now.player_number == 3) {
-                    card.rotate_card(new Vector3(0, card.getHitBox().getCenterY(), 0), 90);
                     card.rot_angles.set(card.rot_angles.x, card.rot_angles.y + 180, card.rot_angles.z);
                     if (i == 0)
                         actual_card_rotation.set(actual_card_rotation.x, 0, actual_card_rotation.z);
@@ -357,5 +344,5 @@ public class Server {/*
                     CanTouch.sprite_collisions.add(card);
             }
         }
-    }*/
+    }
 }

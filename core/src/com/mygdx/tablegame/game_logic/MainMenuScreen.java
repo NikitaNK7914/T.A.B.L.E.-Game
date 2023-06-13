@@ -138,7 +138,7 @@ public class MainMenuScreen implements Screen {
         players_create_stage.addActor(begin_game_button);
         players_create_stage.addActor(add_player_button);
         /*
-        //надится в разработке
+        //находится в разработке(сетевая игра)
         enter_session_name = new TextField("enter session name", skin);
         enter_session_name.setSize(800, 150);
         enter_session_name.setPosition(Gdx.graphics.getWidth() / 2f - enter_players_name.getWidth() * 3f, Gdx.graphics.getHeight() * 0.8f);
@@ -203,6 +203,7 @@ public class MainMenuScreen implements Screen {
                 spriteBatch.end();
                 break;
             }
+            // в разработке(онлайн игра)
             /*case CREATING_ONLINE: {
                 Gdx.input.setInputProcessor(session_create_stage);
                 camera.update();
